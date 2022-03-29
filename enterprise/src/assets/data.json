@@ -1,0 +1,19 @@
+{
+    "data": [{
+            "id": "1",
+            "title": "这是标题",
+            "content": "这是内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容",
+            "type": "weekly",
+            "submitTime": "2022-02-22 22:11",
+            "author": "admin"
+        },
+        {
+            "id": "2",
+            "title": "这是标题",
+            "content": "这是内容内容内容内容内容内容内容内容内容内容内容内容内容内容内容",
+            "type": "monthly",
+            "submitTime": "2022-02-22 18:00",
+            "author": "admin"
+        }
+    ]
+}
