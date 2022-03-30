@@ -28,8 +28,8 @@
                     <a-range-picker :locale="locale" v-if="domain.name === 'rangeBox'" show-time type="date" :size="size" />
                     <a-icon type="minus-circle-o" @click="removeDomain(index)" :size="size" />
                 </a-form-model-item>
-
             </a-form-model>
+            
             <div class="btn-group">
                 <a-button ref="changeSize" @click="changeSize">字体大小</a-button>
                 <a-button ref="singleLine" @click="newFormItemPopup('singleLine')">单行输入框</a-button>
@@ -158,6 +158,7 @@ export default {
                 range: this.range,
                 size: this.size
             }));
+            var i=0;
             this.dynamicForm.forEach((item) => {
                 // 如果传入数据库的 nReportForm 没有该字段，则创建为数组
                 if(!this.nReportForm[this.formDatabase[item.name]]) {
@@ -165,10 +166,11 @@ export default {
                 }
 
                 // 插入传入数据库的 nReportForm 字段数据 以&@#为间隔 首为是否必填 二为标题 后面则是选项
+                
                 if(item.option === '') {
-                    this.nReportForm[this.formDatabase[item.name]].push(`${item.require}&@#${item.title}`);
+                    this.nReportForm[this.formDatabase[item.name]].push(`${item.require}&@#${i++}&@#${item.title}`);
                 } else {
-                    this.nReportForm[this.formDatabase[item.name]].push(`${item.require}&@#${item.title}&@#${item.option}`);
+                    this.nReportForm[this.formDatabase[item.name]].push(`${item.require}&@#${i++}&@#${item.title}&@#${item.option}`);
                 }
             })
 			console.log('点击保存并发布', this.dynamicForm, JSON.stringify(this.nReportForm));
@@ -179,6 +181,8 @@ export default {
                         sessionStorage.removeItem(this.range);
                     }
                     sessionStorage.setItem(this.range, res.data[0][this.range]);
+                }).then(() => {
+                    this.$router.push('/home')
                 })
             })
 		},

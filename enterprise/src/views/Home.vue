@@ -108,7 +108,7 @@ export default {
 		if(sessionStorage.getItem('yearly')) {
 			this.range.yearly = sessionStorage.getItem('yearly');
 		}
-		console.log('range', this.range);
+		// console.log('range', this.range);
 	},
 	methods: {
 		reportModelContainer() {

@@ -1,97 +1,106 @@
 <template>
 	<div class="nform-main">
-        <a-form-model :ref="nReportForm" :model="nReportForm" :label-col="labelCol" :wrapper-col="wrapperCol">
-            <a-form-model-item label="Activity name">
-                <a-input v-model="nReportForm.name" />
-            </a-form-model-item>
-            <a-form-model-item label="Activity zone">
-                <a-select v-model="nReportForm.region" placeholder="please select your zone">
-                    <a-select-option value="shanghai">
-                        Zone one
-                    </a-select-option>
-                    <a-select-option value="beijing">
-                        Zone two
-                    </a-select-option>
-                </a-select>
-            </a-form-model-item>
-            <a-form-model-item label="Activity time">
-                <a-range-picker id="datePicker" :getCalendarContainer="popupPosition" :popupStyle="popupStyle" />
-                <!-- <a-date-picker
-                    id="datePicker"
-                    v-model="nReportForm.date1"
-                    show-time
-                    type="date"
-                    placeholder="Pick a date"
-                    style="width: 100%;"
-                    :getCalendarContainer="popupPosition"
-                /> -->
-            </a-form-model-item>
-            <a-form-model-item label="Instant delivery">
-                <a-switch v-model="nReportForm.delivery" />
-            </a-form-model-item>
-            <a-form-model-item label="Activity type">
-                <a-checkbox-group v-model="nReportForm.type">
-                    <a-checkbox value="1" name="type">
-                        Online
-                    </a-checkbox>
-                    <a-checkbox value="2" name="type">
-                        Promotion
-                    </a-checkbox>
-                    <a-checkbox value="3" name="type">
-                        Offline
-                    </a-checkbox>
-                </a-checkbox-group>
-            </a-form-model-item>
-            <a-form-model-item label="Resources">
-                <a-radio-group v-model="nReportForm.resource">
-                    <a-radio value="1">
-                        Sponsor
-                    </a-radio>
-                    <a-radio value="2">
-                        Venue
-                    </a-radio>
-                </a-radio-group>
-            </a-form-model-item>
-            <a-form-model-item label="Activity form">
-                <a-input v-model="nReportForm.desc" type="textarea" />
-            </a-form-model-item>
-        </a-form-model>
+        <main>
+            <a-form-model :ref="insertReportData" :model="insertReportData" :label-col="labelCol" :wrapper-col="wrapperCol">
+                <a-form-model-item label="标题" required>
+                    <a-input :size="size" v-model="insertReportData.title" />
+                </a-form-model-item>
+                <a-form-model-item :model="allFormData" v-for="(domain, index) in dynamicForm" :key="index" :label="domain.title" :required="domain.require">
+                    <a-input v-if="domain.name === 'singleLine'" :size="size" v-model="allFormData['singleLine'+index]" />
+                    <a-input v-if="domain.name === 'multiLine'" type="textarea" :size="size" v-model="allFormData['multiLine'+index]" />
+                    <a-select v-if="domain.name === 'dropBox'" :size="size" v-model="allFormData['dropBox'+index]">
+                        <a-select-option :value="option" v-for="(option, i) in domain.option.split(',')" :key="i">
+                            {{option}}
+                        </a-select-option>
+                    </a-select>
+                    <a-radio-group v-if="domain.name === 'radioBox'" :size="size" v-model="allFormData['radioBox'+index]">
+                        <a-radio :value="option" v-for="(option, i) in domain.option.split(',')" :key="i">
+                            {{option}}
+                        </a-radio>
+                    </a-radio-group>
+                    <a-checkbox-group v-if="domain.name === 'checkBox'" v-model="allFormData['checkBox'+index]">
+                        <a-checkbox :value="option" v-for="(option, i) in domain.option.split(',')" :key="i">
+                            {{option}}
+                        </a-checkbox>
+                    </a-checkbox-group>
+                    <a-switch v-if="domain.name === 'switchBox'" :size="size" v-model="allFormData['switchBox'+index]" />
+                    <a-date-picker :locale="locale" v-if="domain.name === 'datePickerBox'" show-time type="date" :size="size" v-model="allFormData['datePickerBox'+index]" />
+                    <a-range-picker :locale="locale" v-if="domain.name === 'rangeBox'" show-time type="date" :size="size" v-model="allFormData['rangeBox'+index]" />
+                </a-form-model-item>
+            </a-form-model>
+        </main>
+        <footer>
+            <a-button type="default" @click="saveToDraft">保存到草稿箱</a-button>
+			<a-button type="primary" @click="saveToSubmit">保存并提交</a-button>
+        </footer>
 	</div>
 </template>
 
 <script>
+import moment from 'moment'
 export default {
 	name: 'nform',
 	props: {
-		mainData: Object,
-        condition: Object
+		dynamicForm: Array,
+        formatElseData: Object
 	},
     data() {
         return {
-            nformBodyStyle: {
-                "padding": "0"
-            },
             labelCol: { span: 5 },
             wrapperCol: { span: 14 },
-            nReportForm: {
-                name: '',
-                region: undefined,
-                date1: undefined,
-                delivery: false,
-                type: [],
-                resource: '',
-                desc: '',
+            insertReportData: {
+                title: '',
+                author: sessionStorage.getItem('user'),
+                range: ''
             },
-            popupStyle: {
-                "top": "0"
+            size: 'default',
+            allFormData: {},
+            // 对照表
+            formDatabase: {
+                'singleLine': 's',
+                'multiLine': 'm',
+                'dropBox': 'd',
+                'radioBox': 'r',
+                'checkBox': 'c',
+                'switchBox': 'j',
+                'datePickerBox': 't',
+                'rangeBox': 'mt'
             }
         }
     },
+    beforeMount() {
+        this.size = this.formatElseData.size;
+    },
     methods: {
-        popupPosition(res) {
-            console.log('getCalendarContainer', res);
-            return document.getElementById('datePicker');
+        changeDataFormat() {
+            // 传入数据
+            this.insertReportData.range = this.formatElseData.range;
+            this.insertReportData.tempId = sessionStorage.getItem(this.formatElseData.range);
+            // 修改数据
+            var changedData = {};
+            for(const [key, value] of Object.entries(this.allFormData)) {
+                var type = key.replace(/[0-9]+/g, '');
+                if(!changedData[this.formDatabase[type]]) {
+                    changedData[this.formDatabase[type]] = [];
+                }
+                changedData[this.formDatabase[type]].push(value);
+            }
+            this.insertReportData.content = JSON.stringify(changedData);
+            // console.log('this.insertReportData', JSON.stringify(changedData));
         },
+        saveToDraft() {
+            this.changeDataFormat();
+            // 保存 saveTime
+            this.insertReportData.submitTime = '';
+            this.insertReportData.saveTime = new moment().format('YYYY-MM-DD HH:mm:ss');
+            console.log('点击保存进草稿箱', this.insertReportData);
+        },
+        saveToSubmit() {
+            // 保存提交时间
+            this.insertReportData.saveTime = '';
+            this.insertReportData.submitTime = new moment().format('YYYY-MM-DD HH:mm:ss');
+            console.log('点击提交', this.insertReportData);
+        }
     }
 }
 </script>
@@ -99,9 +108,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
 .nform-main {
-    #datePicker {
-        position: relative;
+    footer {
+        text-align: center;
+        button {
+            margin: 0 10px;
+        }
     }
-    // 时间下拉位置不对
 }
 </style>

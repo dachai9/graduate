@@ -3,14 +3,13 @@
 		<Header></Header>
 		<div class="nReport-content">
 			<main class="nReport-main">
-                <Nform v-if="path.type==='new'" :detailData="detailData" :formatData="formatData"></Nform>
+				<Nform v-if="path.type==='new'" :dynamicForm="formatData" :formatElseData="formatElseData"></Nform>
+				<Nform v-if="path.type==='detail'" :detailData="detailData" :formatData="formatData"></Nform>
 				<TempForm v-if="path.type==='template'" :range="path.range"></TempForm>
+				<footer class="nReport-footer">
+					<a-button v-if="path.type === 'detail'" type="default" @click="returnHome">返回首页</a-button>
+				</footer>
 			</main>
-            <footer class="nReport-footer">
-                <a-button v-if="path.type === 'new'" type="default" @click="saveToDraft">保存到草稿箱</a-button>
-                <a-button v-if="path.type === 'new'" type="primary" @click="saveToSubmit">保存并提交</a-button>
-                <a-button v-if="path.type === 'detail'" type="default" @click="returnHome">返回首页</a-button>
-            </footer>
 		</div>
 	</div>
 </template>
@@ -33,8 +32,62 @@ export default {
 		})
 		console.log('path', path);
 		return {
-			path: path
+			path: path,
+			formatData: [],
+			// 对照表
+            formDatabase: {
+                's': 'singleLine',
+                'm': 'multiLine',
+                'd': 'dropBox',
+                'r': 'radioBox',
+                'c': 'checkBox',
+                'j': 'switchBox',
+                't': 'datePickerBox',
+                'mt': 'rangeBox'
+            },
+			// 其他信息，如size
+			formatElseData: {}
 		}
+	},
+	// mounted:{},
+	beforeMount() {
+		var rangeId = sessionStorage.getItem(this.path.range);
+		// console.log('weekly', rangeId);
+		// 加载
+		this.$axios.get(`http://127.0.0.1:88/getTemp?id=${rangeId}`).then((res) => {
+			// console.log('res', res.data[0]);
+			for(const [key, value] of Object.entries(JSON.parse(res.data[0].temp))) {
+				if(key === 'size') {
+					this.formatElseData.size = value;
+					continue;
+				}
+				if(key === 'range') {
+					this.formatElseData.range = value;
+					continue;
+				}
+				for(let i=0; i < value.length; i++) {
+					let valueArr = value[i].split('&@#');
+					if(valueArr[1] > this.formatData.length) {
+						this.formatData.push({
+							name: this.formDatabase[key],
+							require: JSON.parse(valueArr[0]),
+							title: valueArr[2],
+							option: valueArr[3] || ''
+						})
+					} else {
+						this.formatData.splice(valueArr[1], 0, {
+							name: this.formDatabase[key],
+							require: JSON.parse(valueArr[0]),
+							title: valueArr[2],
+							option: valueArr[3] || ''
+						})
+					}
+				}
+			}
+			console.log('传入Nform组件的模板数据', this.formatData, this.formatElseData);
+			// 取消加载
+			// "{"range":"weekly","size":"default","m":["true&@#k"]}"
+		})
 	},
 	methods: {
         saveToDraft() {

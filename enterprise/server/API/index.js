@@ -94,5 +94,17 @@ router.post('/insertTemp', (req, res) => {
         })
     })
 })
+// 根据模板 id 获取模板
+router.get('/getTemp', (req, res) => {
+    // req.body.first_name
+    // console.log('req', req);
+    var sql = `select temp from templates where tempId = ${req.query.id}`;
+    db.query(sql, (err, data) => {
+        if (err) {
+            return res.send('错误：' + err.message)
+        }
+        res.send(data)
+    })
+})
 
 module.exports = router
