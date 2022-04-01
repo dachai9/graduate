@@ -3,21 +3,6 @@
 		<Header></Header>
 		<div class="draft-content">
 			<main>
-				<div class="draft-search">
-					<div class="report-time">
-						<a-range-picker :placeholder="['开始时间', '结束时间']" @change="onPickerChange" />
-					</div>
-					<div class="staff-search" v-if="isBoss">
-						<StaffSearch :ishomeStaff="false" width="358px"></StaffSearch>
-					</div>
-					<div class="report-search">
-						<a-button type="primary" @click="onhomeSearch">搜索</a-button>
-						<a-button @click="onhomeReset">重置</a-button>
-					</div>
-					<div class="report-div">
-						<a-button ref="week">周报</a-button>
-					</div>
-				</div>
 				<FormatShort :mainData="mainData"></FormatShort>
 				<!-- 点击加载更多 -->
 			</main>
@@ -27,21 +12,26 @@
 
 <script>
 import Header from '../components/Header.vue'
-import mainData from '../assets/data.json'
+// import mainData from '../assets/data.json'
 import FormatShort from '../components/FormatShort.vue'
-import StaffSearch from '../components/StaffSearch'
 export default {
 	name: 'Draft',
 	components: {
         Header,
 		FormatShort,
-		StaffSearch
 	},
 	data() {
 		return {
-			mainData: mainData,
-			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false
+			mainData: [],
+			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
+			authorName: sessionStorage.getItem('user')
 		}
+	},
+	mounted() {
+		this.$axios.post('http://127.0.0.1:88/getDraftData', {authorName: this.authorName}).then((res) => {
+			console.log('res', res);
+			this.mainData = res.data;
+		})
 	},
 	methods: {
 		onPickerChange(date, dateString) {

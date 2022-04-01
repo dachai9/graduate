@@ -3,12 +3,12 @@
 		<Header></Header>
 		<div class="nReport-content">
 			<main class="nReport-main">
-				<Nform v-if="path.type==='new'" :dynamicForm="formatData" :formatElseData="formatElseData"></Nform>
-				<Nform v-if="path.type==='detail'" :detailData="detailData" :formatData="formatData"></Nform>
+				<Nform v-if="path.type==='new'" :type="path.type" :dynamicForm="formatData" :formatElseData="formatElseData"></Nform>
+				<Nform v-if="path.type==='detail'" :type="path.type" :detailData="allFormData" :dynamicForm="formatData" :formatElseData="formatElseData"></Nform>
 				<TempForm v-if="path.type==='template'" :range="path.range"></TempForm>
-				<footer class="nReport-footer">
+				<!-- <footer class="nReport-footer">
 					<a-button v-if="path.type === 'detail'" type="default" @click="returnHome">返回首页</a-button>
-				</footer>
+				</footer> -->
 			</main>
 		</div>
 	</div>
@@ -28,11 +28,11 @@ export default {
 	data() {
 		var path = {};
 		location.search.slice(1, location.search.length).split('&').forEach((item) => {
-			path[item.split('=')[0]] = item.split('=')[1]
+			path[item.split('=')[0]] = item.split('=')[1];
 		})
 		console.log('path', path);
 		return {
-			path: path,
+			path,
 			formatData: [],
 			// 对照表
             formDatabase: {
@@ -46,7 +46,9 @@ export default {
                 'mt': 'rangeBox'
             },
 			// 其他信息，如size
-			formatElseData: {}
+			formatElseData: {},
+			detailData: {},
+			allFormData: {}
 		}
 	},
 	// mounted:{},
@@ -84,9 +86,8 @@ export default {
 					}
 				}
 			}
-			console.log('传入Nform组件的模板数据', this.formatData, this.formatElseData);
-			// 取消加载
 			// "{"range":"weekly","size":"default","m":["true&@#k"]}"
+			// 取消加载
 		})
 	},
 	methods: {
@@ -96,9 +97,6 @@ export default {
         saveToSubmit() {
             console.log('点击保存并提交');
         },
-		returnHome() {
-			this.$router.push('/home')
-		}
 	}
 }
 </script>

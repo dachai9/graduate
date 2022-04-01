@@ -49,7 +49,7 @@
 
 <script>
 import Headers from '../components/Header'
-import mainData from '../assets/data.json'
+// import mainData from '../assets/data.json'
 import FormatShort from '../components/FormatShort.vue'
 import StaffSearch from '../components/StaffSearch'
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
@@ -75,7 +75,7 @@ export default {
 			reportModelBodyStyle: {
 				"padding" : "60px 24px"
 			},
-			mainData: mainData,
+			mainData: [],
 			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
 			isShowReportModel: false,
 			toPageType: 'new',
@@ -108,9 +108,22 @@ export default {
 		if(sessionStorage.getItem('yearly')) {
 			this.range.yearly = sessionStorage.getItem('yearly');
 		}
-		// console.log('range', this.range);
+		this.loadReportData();
 	},
 	methods: {
+		// 加载数据
+		loadReportData() {
+			if(this.isBoss) {
+				this.$axios.post('http://127.0.0.1:88/getSomeReportData').then((res) => {
+					console.log('res', res);
+					this.mainData = res.data;
+				})
+			} else {
+				this.$axios.post('http://127.0.0.1:88/getMyReportData').then((res) => {
+					console.log('res', res);
+				})
+			}
+		},
 		reportModelContainer() {
 			return document.getElementsByClassName('home-content')[0];
 		},

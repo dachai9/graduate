@@ -1,13 +1,14 @@
 <template>
 	<div class="short-main">
-		<a-card v-for="data in mainData.data" :key="data.id" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)">
+		<a-card v-for="data in mainData" :key="data.id" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)">
             <div class="content-main">
                 <p>{{data.content}}</p>
             </div>
 			<div class="content-footer">
-                <span class="short-type">{{typeToName[data.type]}}</span>
+                <span class="short-type">{{typeToName[data.rangeType]}}</span>
                 <span>{{data.submitTime}}</span>
                 <span class="short-author">{{data.author}}</span>
+                <!-- <a-button icon="delete" type="danger" shape="circle" ghost></a-button> -->
             </div>
 		</a-card>
 	</div>
@@ -17,7 +18,7 @@
 export default {
 	name: 'short',
 	props: {
-		mainData: Object
+		mainData: Array
 	},
     data() {
         return {
@@ -26,14 +27,16 @@ export default {
             },
             typeToName: {
                 "weekly": "周报",
-                "monthly": "月报"
+                "monthly": "月报",
+                "seasonal": "季报",
+                "yearly": "年报"
             }
         }
     },
     methods: {
         openDetail(data) {
-            console.log('点击进入详情', data);
-            this.$router.push(`/report?type=detail&range=${data.type}&reportId=${data.id}`);
+            // console.log('点击进入详情', data);
+            this.$router.push(`/report?type=detail&range=${data.rangeType}&id=${data.reportId}`);
         }
     }
 }

@@ -106,5 +106,73 @@ router.get('/getTemp', (req, res) => {
         res.send(data)
     })
 })
+// 插入报告数据
+router.post('/updateReportData', (req, res) => {
+    // req.body.first_name
+    // console.log('req', req);
+    var sql = `insert into reports (title, content, rangeType, ${req.body.saveTime === '' ? 'submitTime' : 'saveTime'}, author, tempId) values ('${req.body.title}', '${req.body.content}', '${req.body.range}', '${req.body.saveTime === '' ? req.body.submitTime : req.body.saveTime}', '${req.body.author}', ${req.body.tempId});`;
+    var selectSql = `select max(reportId) as id from reports`;
+    db.query(sql, (err) => {
+        if (err) {
+            return res.send('错误：' + err.message)
+        }
+        db.query(selectSql, (err, data) => {
+            if (err) {
+                return res.send('错误：' + err.message)
+            }
+            res.send(data)
+        })
+    })
+})
+// 获取报告数据
+router.get('/getReportData', (req, res) => {
+    // req.body.first_name
+    // console.log('req', req);
+    var sql = `select * from reports where reportId = ${req.query.id}`;
+    db.query(sql, (err, data) => {
+        if (err) {
+            return res.send('错误：' + err.message)
+        }
+        res.send(data)
+    })
+})
+// Boss获取符合条件的报告数据
+router.post('/getSomeReportData', (req, res) => {
+    // req.body.first_name
+    // console.log('req', req);
+    // var sql = `select * from reports${req.body.condition ? ' where reportId = ${req.query.id}' : ''}`;
+    // 已提交
+    var sql = `select * from reports where submitTime <> ''`;
+    db.query(sql, (err, data) => {
+        if (err) {
+            return res.send('错误：' + err.message)
+        }
+        res.send(data)
+    })
+})
+// 员工获取符合条件的报告数据
+router.post('/getMyReportData', (req, res) => {
+    // req.body.first_name
+    // console.log('req', req);
+    var sql = `select * from reports${req.body.condition ? ' where reportId = ${req.query.id}' : ''}`;
+    db.query(sql, (err, data) => {
+        if (err) {
+            return res.send('错误：' + err.message)
+        }
+        res.send(data)
+    })
+})
+// 获取草稿箱数据
+router.post('/getDraftData', (req, res) => {
+    // req.body.first_name
+    // console.log('req', req);
+    var sql = `select * from reports where saveTime <> '' and author = '${req.body.authorName}'`;
+    db.query(sql, (err, data) => {
+        if (err) {
+            return res.send('错误：' + err.message)
+        }
+        res.send(data)
+    })
+})
 
 module.exports = router
