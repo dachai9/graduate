@@ -1,14 +1,17 @@
 <template>
 	<div class="short-main">
-		<a-card v-for="data in mainData" :key="data.id" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)">
+		<a-card v-for="data in mainData" :key="data.reportId" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)">
             <div class="content-main">
                 <p>{{data.content}}</p>
             </div>
 			<div class="content-footer">
+                <a-popconfirm title="确定删掉该报告？" ok-text="是的" cancel-text="不了吧" @confirm="deleteReport(data.reportId)">
+                    <a-button title="删除" class="delete-icon" v-if="path === '/draft'" icon="delete" type="danger" ghost size="small" @click="onDeleteClick"></a-button>
+                </a-popconfirm>
                 <span class="short-type">{{typeToName[data.rangeType]}}</span>
-                <span>{{data.submitTime}}</span>
+                <span v-if="path === '/home'">{{data.submitTime}}</span>
+                <span v-if="path === '/draft'">{{data.saveTime}}</span>
                 <span class="short-author">{{data.author}}</span>
-                <!-- <a-button icon="delete" type="danger" shape="circle" ghost></a-button> -->
             </div>
 		</a-card>
 	</div>
@@ -30,13 +33,29 @@ export default {
                 "monthly": "月报",
                 "seasonal": "季报",
                 "yearly": "年报"
-            }
+            },
+            path: location.pathname
         }
     },
     methods: {
         openDetail(data) {
-            // console.log('点击进入详情', data);
-            this.$router.push(`/report?type=detail&range=${data.rangeType}&id=${data.reportId}`);
+            console.log('点击进入详情', data);
+            this.$router.push(`/report?type=${this.path === '/draft' ? 'draft' : 'detail'}&range=${data.rangeType}&id=${data.reportId}`);
+        },
+        onDeleteClick(e) {
+            // console.log(e);
+            e.cancelBubble = true;
+            // e.preventDefault();
+        },
+        deleteReport(id) {
+            // console.log('删除的报告id', id);
+            this.$emit('toggleSpin', true);
+            this.$axios.post('http://127.0.0.1:88/deleteAReport', {id: id}).then(() => {
+                // console.log('res', res.data);
+                // 重新请求数据，因为不是
+                this.$emit('getDraftData');
+                this.$emit('toggleSpin', false);
+            })
         }
     }
 }
@@ -53,7 +72,7 @@ export default {
     padding: 10px 24px;
     overflow: hidden;
     span {
-        margin-left: 12px;
+        margin-left: 8px;
         float: right;
         padding: 2px 5px;
         font-size: 12px;
@@ -75,6 +94,13 @@ export default {
         border: 1px solid #57a6ec;
         border-radius: 5px;
         margin-left: 0;
+    }
+    .delete-icon {
+        float: right;
+        margin-left: 10px;
+        border: none;
+        box-shadow: none;
+        margin-top: -3px;;
     }
 }
 </style>

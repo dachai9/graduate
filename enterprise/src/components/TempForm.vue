@@ -26,7 +26,9 @@
                     <a-switch v-if="domain.name === 'switchBox'" :size="size" />
                     <a-date-picker :locale="locale" v-if="domain.name === 'datePickerBox'" show-time type="date" :size="size" />
                     <a-range-picker :locale="locale" v-if="domain.name === 'rangeBox'" show-time type="date" :size="size" />
-                    <a-icon type="minus-circle-o" @click="removeDomain(index)" :size="size" />
+                    <a-icon type="up-square-o" @click="moveUp(index)" :style="{'fontSize': '20px', 'right': '-50px', 'color': '#999'}"/>
+                    <a-icon type="down-square" @click="moveDown(index)" :style="{'fontSize': '20px', 'right': '-90px', 'color': '#999'}" />
+                    <a-icon type="minus-square" @click="removeDomain(index)" :style="{'fontSize': '20px', 'right': '-130px', 'color': '#999'}" />
                 </a-form-model-item>
             </a-form-model>
             
@@ -77,24 +79,26 @@ import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
 export default {
 	name: 'tempform',
 	props: {
-        range: String
+        range: String,
+        dynamicForm: Array,
+        formatElseData: Object
 	},
     data() {
-        let range = this.range;
+        // let range = this.formatElseData.range;
         return {
             locale,
             labelCol: { span: 5 },
             wrapperCol: { span: 14 },
-            size: 'default',
+            size: this.formatElseData.size || 'default',
             nReportForm: {
-                range: range,
-                size: 'default'
+                range: this.formatElseData.range,
+                size: this.formatElseData.size || 'default'
             },
             popupStyle: {
                 "top": "0"
             },
             isShowNewFormItemPopup: false,
-            dynamicForm: [],
+            // dynamicForm: [],
             formInfo: {
                 name: '',
                 require: true,
@@ -148,11 +152,32 @@ export default {
                 this.isShowNewFormItemPopup = false;
             }
         },
+        // 往上移
+        moveUp(index) {
+            if(index === 0) {
+                this.$message.error('已经是第一个！');
+            } else {
+                var item = this.dynamicForm.slice(index, index+1);
+                this.dynamicForm.splice(index, 1);
+                this.dynamicForm.splice(index-1, 0, ...item);
+            }
+        },
+        // 往上移
+        moveDown(index) {
+            if(index === this.dynamicForm.length - 1) {
+                this.$message.error('已经是最后一个！');
+            } else {
+                var item = this.dynamicForm.slice(index, index + 1);
+                this.dynamicForm.splice(index, 1);
+                this.dynamicForm.splice(index + 1, 0, ...item);
+            }
+        },
         // 移除节点
         removeDomain(index) {
             this.dynamicForm.splice(index, 1);
         },
 		saveTemplateToSubmit() {
+            this.$emit('toggleSpin', true);
             // 重置
             this.nReportForm = JSON.parse(JSON.stringify({
                 range: this.range,
@@ -174,15 +199,18 @@ export default {
                 }
             })
 			console.log('点击保存并发布', this.dynamicForm, JSON.stringify(this.nReportForm));
-            this.$axios.post('http://127.0.0.1:88/insertTemp', {temp: JSON.stringify(this.nReportForm), range: this.range, department: sessionStorage.getItem('department')}).then(() => {
+            this.$axios.post('http://127.0.0.1:88/insertTemp', {temp: JSON.stringify(this.nReportForm), range: this.range, department: sessionStorage.getItem('department')}).then((response) => {
+                console.log('保存并发布之后的执行结果', response);
                 // 更新缓存
                 this.$axios.post(`http://127.0.0.1:88/getTemp`, {depart: sessionStorage.getItem('department')}).then((res) => {
+                    console.log('查询该部门的报告类型对应模板', res);
                     if(sessionStorage.getItem(this.range)) {
                         sessionStorage.removeItem(this.range);
                     }
                     sessionStorage.setItem(this.range, res.data[0][this.range]);
                 }).then(() => {
-                    this.$router.push('/home')
+                    this.$router.push('/home');
+                    this.$emit('toggleSpin', false);
                 })
             })
 		},
@@ -207,7 +235,11 @@ export default {
     .anticon {
         position: absolute;
         right: -50px;
-        top: 2px;
+        top: 1px;
+        svg {
+            width: 20px!important;
+            height: 20px!important;
+        }
     }
     footer {
         text-align: center;

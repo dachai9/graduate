@@ -1,24 +1,26 @@
 <template>
     <div class="login-main">
-        <div class="login-box">
-            <h3 class="login-font">企业工作报告智慧平台</h3>
-            <a-form-model ref="loginForm" :model="form" :rules="loginRules" :labelCol="{span: 4}" :wrapperCol="{span: 19}">
-                <a-form-model-item label="工号：" required prop="number">
-                    <a-input v-model="form.number" placeholder="请输入工号" @pressEnter="login()" />
-                </a-form-model-item>
-                <a-form-model-item label="密码：" required prop="password">
-                    <a-input-password v-model="form.password" placeholder="请输入密码" @pressEnter="login()" />
-                </a-form-model-item>
-                <a-form-model-item :wrapperCol="{span: 24, offset: 11}">
-                    <a-button type="primary" :style="{'margin-right': '20px'}" @click="login()">
-                        登录
-                    </a-button>
-                    <!-- <a-button type="default" @click="toRegister()">
-                        点击注册
-                    </a-button> -->
-                </a-form-model-item>
-            </a-form-model>
-        </div>
+        <a-spin :spinning="isSearchSpinShow">
+            <div class="login-box">
+                <h3 class="login-font">企业工作报告智慧平台</h3>
+                <a-form-model ref="loginForm" :model="form" :rules="loginRules" :labelCol="{span: 4}" :wrapperCol="{span: 19}">
+                    <a-form-model-item label="工号：" required prop="number">
+                        <a-input v-model="form.number" placeholder="请输入工号" @pressEnter="login()" />
+                    </a-form-model-item>
+                    <a-form-model-item label="密码：" required prop="password">
+                        <a-input-password v-model="form.password" placeholder="请输入密码" @pressEnter="login()" />
+                    </a-form-model-item>
+                    <a-form-model-item :wrapperCol="{span: 24, offset: 11}">
+                        <a-button type="primary" :style="{'margin-right': '20px'}" @click="login()">
+                            登录
+                        </a-button>
+                        <!-- <a-button type="default" @click="toRegister()">
+                            点击注册
+                        </a-button> -->
+                    </a-form-model-item>
+                </a-form-model>
+            </div>
+        </a-spin>
     </div>
 </template>
 
@@ -41,6 +43,7 @@ export default {
     },
     methods: {
         login() {
+            this.isSearchSpinShow = true;
             this.$refs.loginForm.validate(valid => {
                 if(valid) {
                     // console.log('验证成功', valid);
@@ -68,10 +71,12 @@ export default {
                             res.data[0].monthly ? sessionStorage.setItem('monthly', res.data[0].monthly) : '';
                             res.data[0].seasonal ? sessionStorage.setItem('seasonal', res.data[0].seasonal) : '';
                             res.data[0].yearly ? sessionStorage.setItem('yearly', res.data[0].yearly) : '';
+                            this.isSearchSpinShow = false;
                         })
                     })
                 } else {
                     console.log('验证不成功');
+                    this.isSearchSpinShow = false;
                     return false;
                 }
             })

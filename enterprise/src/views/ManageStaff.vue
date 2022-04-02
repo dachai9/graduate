@@ -1,46 +1,49 @@
 <template>
 	<div class="manageStaff">
 		<Headers></Headers>
-		<main>
-			<a-tabs default-active-key="more" tabPosition="left" size="large">
-				<a-tab-pane key="more" tab="添加新员工">
-					<div class="new-staff-search">
-						<StaffSearch @getSearchData="getSearchData"></StaffSearch>
-					</div>
-					<div class="new-staff-add">
-						<a-card v-for="data in staffData" :key="data.staffId" style="width: 400px" hoverable @click="nStaffChoose(data)">
-							<span>{{data.staffId}}</span>
-							<span>{{data.staffName}}</span>
-							<span class="staff-choose">{{data.department === department ? '已选' : '未选'}}</span>
-						</a-card>
-					</div>
-					<div class="new-staff-confirm-model">
-						<a-modal v-model="isShowNStaffModeln" title="确定添加该员工进入部门？" cancelText="取消" @ok="nStaffConfirm(nStaffInfo)">
-							<p>工号：{{nStaffInfo.staffId}}</p>
-							<p>姓名：{{nStaffInfo.staffName}}</p>
-						</a-modal>
-					</div>
-				</a-tab-pane>
-				<a-tab-pane key="less" tab="移除旧员工">
-					<div class="less-staff-search">
-						<StaffSearch @getSearchData="getSearchDatal"></StaffSearch>
-					</div>
-					<div class="less-staff-add">
-						<a-card v-for="data in lStaffData" :key="data.staffId" style="width: 400px" hoverable @click="lStaffChoose(data)">
-							<span>{{data.staffId}}</span>
-							<span>{{data.staffName}}</span>
-							<span class="staff-choose">{{data.department === department ? '已选' : '未选'}}</span>
-						</a-card>
-					</div>
-					<div class="less-staff-confirm-model">
-						<a-modal v-model="isShowNStaffModell" title="确定将该员工移出部门？" cancelText="取消" @ok="lStaffConfirm(lStaffInfo)">
-							<p>工号：{{lStaffInfo.staffId}}</p>
-							<p>姓名：{{lStaffInfo.staffName}}</p>
-						</a-modal>
-					</div>
-				</a-tab-pane>
-			</a-tabs>
-		</main>
+		<!-- <a-spin :spinning="isSearchSpinShow" :delay="1000"> -->
+			<main>
+		<a-spin :spinning="isSearchSpinShow" :delay="1000">
+				<a-tabs default-active-key="more" tabPosition="left" size="large">
+					<a-tab-pane key="more" tab="添加新员工">
+						<div class="new-staff-search">
+							<StaffSearch @getSearchData="getSearchData" @toggleSpin="toggleSpin"></StaffSearch>
+						</div>
+						<div class="new-staff-add">
+							<a-card v-for="data in staffData" :key="data.staffId" style="width: 400px" hoverable @click="nStaffChoose(data)">
+								<span>{{data.staffId}}</span>
+								<span>{{data.staffName}}</span>
+								<span class="staff-choose">{{data.department === department ? '已选' : '未选'}}</span>
+							</a-card>
+						</div>
+						<div class="new-staff-confirm-model">
+							<a-modal v-model="isShowNStaffModeln" title="确定添加该员工进入部门？" cancelText="取消" @ok="nStaffConfirm(nStaffInfo)">
+								<p>工号：{{nStaffInfo.staffId}}</p>
+								<p>姓名：{{nStaffInfo.staffName}}</p>
+							</a-modal>
+						</div>
+					</a-tab-pane>
+					<a-tab-pane key="less" tab="移除旧员工">
+						<div class="less-staff-search">
+							<StaffSearch @getSearchData="getSearchDatal" @toggleSpin="toggleSpin"></StaffSearch>
+						</div>
+						<div class="less-staff-add">
+							<a-card v-for="data in lStaffData" :key="data.staffId" style="width: 400px" hoverable @click="lStaffChoose(data)">
+								<span>{{data.staffId}}</span>
+								<span>{{data.staffName}}</span>
+								<span class="staff-choose">{{data.department === department ? '已选' : '未选'}}</span>
+							</a-card>
+						</div>
+						<div class="less-staff-confirm-model">
+							<a-modal v-model="isShowNStaffModell" title="确定将该员工移出部门？" cancelText="取消" @ok="lStaffConfirm(lStaffInfo)">
+								<p>工号：{{lStaffInfo.staffId}}</p>
+								<p>姓名：{{lStaffInfo.staffName}}</p>
+							</a-modal>
+						</div>
+					</a-tab-pane>
+				</a-tabs>
+		</a-spin>
+			</main>
 	</div>
 </template>
 
@@ -61,7 +64,8 @@ export default {
 			lStaffInfo: {},
 			isShowNStaffModeln: false,
 			isShowNStaffModell: false,
-			department: sessionStorage.getItem('department')
+			department: sessionStorage.getItem('department'),
+			isSearchSpinShow: false
 		}
 	},
 	methods: {
@@ -78,10 +82,12 @@ export default {
 			}
 		},
 		nStaffConfirm(val) {
+			this.isSearchSpinShow = true;
 			console.log('确定添加该员工', val);
 			this.$axios.post('http://127.0.0.1:88/updateStaff', {staffId: val.staffId, department: this.department}).then((res) => {
 				console.log('res', res);
 				this.$message.success('添加成功');
+				this.isSearchSpinShow = false;
 			})
 			this.isShowNStaffModeln = false;
 		},
@@ -97,12 +103,17 @@ export default {
 			}
 		},
 		lStaffConfirm(val) {
+			this.isSearchSpinShow = true;
 			console.log('确定移出该员工', val);
 			this.$axios.post('http://127.0.0.1:88/updateStaff', {staffId: val.staffId, department: null}).then((res) => {
 				console.log('res', res);
 				this.$message.success('移出成功');
+				this.isSearchSpinShow = false;
 			})
 			this.isShowNStaffModell = false;
+		},
+		toggleSpin(state) {
+			this.isSearchSpinShow = state;
 		}
 	}
 }

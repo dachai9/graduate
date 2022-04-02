@@ -1,27 +1,29 @@
 <template>
     <div class="change-main">
-        <div class="change-box">
-            <h3 class="change-font">企业工作报告智慧平台</h3>
-            <a-form-model ref="changepswForm" :model="pswForm" :rules="changeRules" :labelCol="{span: 4}" :wrapperCol="{span: 19}">
-                <a-form-model-item label="工号：" required prop="number">
-                    <a-input v-model="pswForm.number" placeholder="请输入工号" @pressEnter="changepsw()" />
-                </a-form-model-item>
-                <a-form-model-item label="旧密码：" required prop="oPassword">
-                    <a-input-password v-model="pswForm.oPassword" placeholder="请输入当前账户密码" @pressEnter="changepsw()" />
-                </a-form-model-item>
-                <a-form-model-item label="新密码：" required prop="nPassword">
-                    <a-input-password v-model="pswForm.nPassword" placeholder="请输入新密码" @pressEnter="changepsw()" />
-                </a-form-model-item>
-                <a-form-model-item label="确认新密码：" required prop="cnPassword">
-                    <a-input-password v-model="pswForm.cnPassword" placeholder="请再次输入新密码" @pressEnter="changepsw()" />
-                </a-form-model-item>
-                <a-form-model-item :wrapperCol="{span: 24, offset: 10}">
-                    <a-button type="primary" @click="changepsw()">
-                        修改密码
-                    </a-button>
-                </a-form-model-item>
-            </a-form-model>
-        </div>
+        <a-spin :spinning="isSearchSpinShow">
+            <div class="change-box">
+                <h3 class="change-font">企业工作报告智慧平台</h3>
+                <a-form-model ref="changepswForm" :model="pswForm" :rules="changeRules" :labelCol="{span: 4}" :wrapperCol="{span: 19}">
+                    <a-form-model-item label="工号：" required prop="number">
+                        <a-input v-model="pswForm.number" placeholder="请输入工号" @pressEnter="changepsw()" />
+                    </a-form-model-item>
+                    <a-form-model-item label="旧密码：" required prop="oPassword">
+                        <a-input-password v-model="pswForm.oPassword" placeholder="请输入当前账户密码" @pressEnter="changepsw()" />
+                    </a-form-model-item>
+                    <a-form-model-item label="新密码：" required prop="nPassword">
+                        <a-input-password v-model="pswForm.nPassword" placeholder="请输入新密码" @pressEnter="changepsw()" />
+                    </a-form-model-item>
+                    <a-form-model-item label="确认新密码：" required prop="cnPassword">
+                        <a-input-password v-model="pswForm.cnPassword" placeholder="请再次输入新密码" @pressEnter="changepsw()" />
+                    </a-form-model-item>
+                    <a-form-model-item :wrapperCol="{span: 24, offset: 10}">
+                        <a-button type="primary" @click="changepsw()">
+                            修改密码
+                        </a-button>
+                    </a-form-model-item>
+                </a-form-model>
+            </div>
+        </a-spin>
     </div>
 </template>
 
@@ -59,13 +61,15 @@ export default {
                 nPassword: [{ validator: checkoPsw, trigger: 'blur'}],
                 // nPassword: [{ required: true, message: '请输入新密码', trigger: 'blur'}],
                 cnPassword: [{ validator: checkPsw, trigger: 'blur'}],
-            }
+            },
+            isSearchSpinShow: false
         };
     },
     computed: {
     },
     methods: {
         changepsw() {
+            this.isSearchSpinShow = true;
             this.$refs.changepswForm.validate(valid => {
                 if(valid) {
                     console.log('验证成功', valid);
@@ -78,9 +82,11 @@ export default {
                         } else {
                             this.$message.error(response.data);
                         }
+                        this.isSearchSpinShow = true;
                     })
                 } else {
                     console.log('验证不成功');
+                    this.isSearchSpinShow = true;
                     return false;
                 }
             })

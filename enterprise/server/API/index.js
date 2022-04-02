@@ -1,6 +1,7 @@
 let express = require('express')
 let router = express.Router()
 let db = require('../db/index')
+let moment = require('moment');
 
 // router.get('/index', (req, res) => {
 //     var sql = 'SELECT * FROM enterprise.`table_index`;'
@@ -82,13 +83,15 @@ router.post('/insertTemp', (req, res) => {
     // req.body.first_name
     var sql = `insert into templates (temp) values ('${req.body.temp}')`;
     var updateSql = `update enterprise.departments a, enterprise.templates b set a.${req.body.range} = (select max(tempId) from templates) where a.departName = '${req.body.department}';`
+    // console.log('sql', sql);
+    // console.log('updateSql', updateSql);
     db.query(sql, (err) => {
         if (err) {
-            return res.send('错误：' + err.message)
+            return res.send('插入错误：' + err.message)
         }
         db.query(updateSql, (err) => {
             if (err) {
-                return res.send('错误：' + err.message)
+                return res.send('更新错误：' + err.message)
             }
             res.send('success')
         })
@@ -110,18 +113,26 @@ router.get('/getTemp', (req, res) => {
 router.post('/updateReportData', (req, res) => {
     // req.body.first_name
     // console.log('req', req);
-    var sql = `insert into reports (title, content, rangeType, ${req.body.saveTime === '' ? 'submitTime' : 'saveTime'}, author, tempId) values ('${req.body.title}', '${req.body.content}', '${req.body.range}', '${req.body.saveTime === '' ? req.body.submitTime : req.body.saveTime}', '${req.body.author}', ${req.body.tempId});`;
+    if (req.body.change) {
+        var sql = `update reports set title = '${req.body.title}', content = '${req.body.content}', rangeType = '${req.body.range}', saveTime = '${req.body.saveTime}', submitTime = '${req.body.submitTime}', author = '${req.body.author}', tempId = ${req.body.tempId} where reportId = '${req.body.id}'`;
+    } else {
+        var sql = `insert into reports (title, content, rangeType, ${req.body.saveTime === '' ? 'submitTime' : 'saveTime'}, author, tempId) values ('${req.body.title}', '${req.body.content}', '${req.body.range}', '${req.body.saveTime === '' ? req.body.submitTime : req.body.saveTime}', '${req.body.author}', ${req.body.tempId});`;
+    }
     var selectSql = `select max(reportId) as id from reports`;
     db.query(sql, (err) => {
         if (err) {
             return res.send('错误：' + err.message)
         }
-        db.query(selectSql, (err, data) => {
-            if (err) {
-                return res.send('错误：' + err.message)
-            }
-            res.send(data)
-        })
+        if (req.body.change) {
+            res.send({ id: req.body.id });
+        } else {
+            db.query(selectSql, (err, data) => {
+                if (err) {
+                    return res.send('错误：' + err.message)
+                }
+                res.send(data)
+            })
+        }
     })
 })
 // 获取报告数据
@@ -140,9 +151,11 @@ router.get('/getReportData', (req, res) => {
 router.post('/getSomeReportData', (req, res) => {
     // req.body.first_name
     // console.log('req', req);
-    // var sql = `select * from reports${req.body.condition ? ' where reportId = ${req.query.id}' : ''}`;
-    // 已提交
-    var sql = `select * from reports where submitTime <> ''`;
+    var body = req.body;
+    // var isScreenedStr = body.isScreenedArr.join(',');
+    var sql = `select * from reports where${body.screenName ? " author like '%" + body.screenName + "%' and " : ""} submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc`;
+
+    // console.log('sql', sql);
     db.query(sql, (err, data) => {
         if (err) {
             return res.send('错误：' + err.message)
@@ -154,7 +167,7 @@ router.post('/getSomeReportData', (req, res) => {
 router.post('/getMyReportData', (req, res) => {
     // req.body.first_name
     // console.log('req', req);
-    var sql = `select * from reports${req.body.condition ? ' where reportId = ${req.query.id}' : ''}`;
+    var sql = `select * from reports${req.body.condition ? ' where reportId = ${req.query.id}' : ''} order by submitTime desc`;
     db.query(sql, (err, data) => {
         if (err) {
             return res.send('错误：' + err.message)
@@ -166,12 +179,24 @@ router.post('/getMyReportData', (req, res) => {
 router.post('/getDraftData', (req, res) => {
     // req.body.first_name
     // console.log('req', req);
-    var sql = `select * from reports where saveTime <> '' and author = '${req.body.authorName}'`;
+    var sql = `select * from reports where saveTime <> '' and author = '${req.body.authorName}' order by saveTime desc`;
     db.query(sql, (err, data) => {
         if (err) {
             return res.send('错误：' + err.message)
         }
         res.send(data)
+    })
+})
+// 删除某条数据
+router.post('/deleteAReport', (req, res) => {
+    // req.body.first_name
+    var sql = `delete from reports where reportId = ${req.body.id}`;
+    console.log('sql', sql);
+    db.query(sql, (err) => {
+        if (err) {
+            return res.send('错误：' + err.message)
+        }
+        res.send('success')
     })
 })
 

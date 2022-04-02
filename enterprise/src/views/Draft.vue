@@ -2,10 +2,12 @@
 	<div class="draft-main">
 		<Header></Header>
 		<div class="draft-content">
-			<main>
-				<FormatShort :mainData="mainData"></FormatShort>
-				<!-- 点击加载更多 -->
-			</main>
+			<a-spin :spinning="isSearchSpinShow">
+				<main>
+					<FormatShort :mainData="mainData" @getDraftData="getDraftData" @toggleSpin="toggleSpin"></FormatShort>
+					<!-- 点击加载更多 -->
+				</main>
+			</a-spin>
 		</div>
 	</div>
 </template>
@@ -24,16 +26,22 @@ export default {
 		return {
 			mainData: [],
 			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
-			authorName: sessionStorage.getItem('user')
+			authorName: sessionStorage.getItem('user'),
+			isSearchSpinShow: false
 		}
 	},
 	mounted() {
-		this.$axios.post('http://127.0.0.1:88/getDraftData', {authorName: this.authorName}).then((res) => {
-			console.log('res', res);
-			this.mainData = res.data;
-		})
+		this.getDraftData();
 	},
 	methods: {
+		getDraftData() {
+			this.isSearchSpinShow = true;
+			this.$axios.post('http://127.0.0.1:88/getDraftData', {authorName: this.authorName}).then((res) => {
+				// console.log('res', res);
+				this.mainData = res.data;
+				this.isSearchSpinShow = false;
+			})
+		},
 		onPickerChange(date, dateString) {
 			console.log('date, dateString', date, dateString);
 			// 传进数据库搜索
@@ -44,6 +52,9 @@ export default {
 		onhomeReset() {
 			console.log('点击重置');
 		},
+		toggleSpin(state) {
+			this.isSearchSpinShow = state;
+		}
 	}
 }
 </script>
