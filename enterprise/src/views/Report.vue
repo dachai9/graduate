@@ -60,7 +60,8 @@ export default {
 	},
 	methods: {
 		getTempData() {
-			var rangeId = sessionStorage.getItem(this.path.range);
+			// var rangeId = sessionStorage.getItem(this.path.range);
+			var rangeId = this.path.temp || sessionStorage.getItem(this.path.range);
 			// console.log('weekly', rangeId);
 			// 加载
 			this.isSearchSpinShow = true;

@@ -1,7 +1,7 @@
 <template>
     <div class="login-main">
-        <a-spin :spinning="isSearchSpinShow">
             <div class="login-box">
+        <a-spin :spinning="isSearchSpinShow">
                 <h3 class="login-font">企业工作报告智慧平台</h3>
                 <a-form-model ref="loginForm" :model="form" :rules="loginRules" :labelCol="{span: 4}" :wrapperCol="{span: 19}">
                     <a-form-model-item label="工号：" required prop="number">
@@ -19,8 +19,8 @@
                         </a-button> -->
                     </a-form-model-item>
                 </a-form-model>
-            </div>
         </a-spin>
+            </div>
     </div>
 </template>
 
@@ -36,7 +36,8 @@ export default {
                 number: [{ required: true, message: '工号不能为空', trigger: 'blur'}],
                 password: [{required: true, message: '密码不能为空', trigger: 'blur'}],
             },
-            department: ''
+            department: '',
+            isSearchSpinShow: false
         };
     },
     computed: {
@@ -60,19 +61,20 @@ export default {
                                 this.$router.push('/changepsw');
                             }else {
                                 this.$router.push('/home');
+                                // this.$router.push(0);
                             }
+                            this.$axios.post(`http://127.0.0.1:88/getTemp`, {depart: this.department}).then((res) => {
+                                // console.log('获取到已创建的模板类型', res);
+                                res.data[0].weekly ? sessionStorage.setItem('weekly', res.data[0].weekly) : '';
+                                res.data[0].monthly ? sessionStorage.setItem('monthly', res.data[0].monthly) : '';
+                                res.data[0].seasonal ? sessionStorage.setItem('seasonal', res.data[0].seasonal) : '';
+                                res.data[0].yearly ? sessionStorage.setItem('yearly', res.data[0].yearly) : '';
+                                this.isSearchSpinShow = false;
+                            })
                         } else {
-                            this.$message.error('工号或密码输入错误 ！');
-                        }
-                    }).then(() => {
-                        this.$axios.post(`http://127.0.0.1:88/getTemp`, {depart: this.department}).then((res) => {
-                            // console.log('获取到已创建的模板类型', res);
-                            res.data[0].weekly ? sessionStorage.setItem('weekly', res.data[0].weekly) : '';
-                            res.data[0].monthly ? sessionStorage.setItem('monthly', res.data[0].monthly) : '';
-                            res.data[0].seasonal ? sessionStorage.setItem('seasonal', res.data[0].seasonal) : '';
-                            res.data[0].yearly ? sessionStorage.setItem('yearly', res.data[0].yearly) : '';
+                            this.$message.error('工号或密码输入错误！');
                             this.isSearchSpinShow = false;
-                        })
+                        }
                     })
                 } else {
                     console.log('验证不成功');

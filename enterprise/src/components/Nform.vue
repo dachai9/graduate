@@ -120,7 +120,8 @@ export default {
     methods: {
         // 修改传入的表单具体数据
         changeFormData() {
-            var content = JSON.parse(this.detailData.content);
+            var content = JSON.parse(this.detailData.content.replace(/\r/g,"\\r").replace(/\n/g,"\\n"));
+            console.log('改之前获取到的content', content);
             var allFormData = {};
             for(let i=0; i<this.dynamicForm.length; i++) {
                 // this.allFormData.dropBox0 = data.d[0]
@@ -146,6 +147,14 @@ export default {
             this.insertReportData.tempId = sessionStorage.getItem(this.formatElseData.range);
             // 修改数据
             var changedData = {};
+            console.log('所有的this.allFormData', this.dynamicForm, this.allFormData);
+            var shortReport = '';
+            for(let i=0; i<this.dynamicForm.length; i++) {
+                shortReport += this.dynamicForm[i].title + '：' + this.allFormData[this.dynamicForm[i].name + '' + i] + '     ';
+            }
+            console.log('处理后的shortReport', shortReport);
+            // debugger;
+            this.insertReportData.shortCut = shortReport;
             for(const [key, value] of Object.entries(this.allFormData)) {
                 var type = key.replace(/[0-9]+/g, '');
                 if(!changedData[this.formDatabase[type]]) {

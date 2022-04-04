@@ -2,7 +2,8 @@
 	<div class="short-main">
 		<a-card v-for="data in mainData" :key="data.reportId" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)">
             <div class="content-main">
-                <p>{{data.content}}</p>
+                <!-- <p>{{getContent(data)}}</p> -->
+                <p :title="data.shortCut">{{data.shortCut}}</p>
             </div>
 			<div class="content-footer">
                 <a-popconfirm title="确定删掉该报告？" ok-text="是的" cancel-text="不了吧" @confirm="deleteReport(data.reportId)">
@@ -14,6 +15,9 @@
                 <span class="short-author">{{data.author}}</span>
             </div>
 		</a-card>
+        <div class="no-data" v-if="!mainData.length">
+            <a-card>暂无数据</a-card>
+        </div>
 	</div>
 </template>
 
@@ -34,13 +38,17 @@ export default {
                 "seasonal": "季报",
                 "yearly": "年报"
             },
-            path: location.pathname
+            path: location.pathname,
         }
     },
     methods: {
+        // getContent(data) {
+            
+        //     return JSON.stringify(JSON.parse(data.content).d);
+        // },
         openDetail(data) {
             console.log('点击进入详情', data);
-            this.$router.push(`/report?type=${this.path === '/draft' ? 'draft' : 'detail'}&range=${data.rangeType}&id=${data.reportId}`);
+            this.$router.push(`/report?type=${this.path === '/draft' ? 'draft' : 'detail'}&range=${data.rangeType}&id=${data.reportId}&temp=${data.tempId}`);
         },
         onDeleteClick(e) {
             // console.log(e);
@@ -64,7 +72,16 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
 .content-main {
-    padding: 24px;
+    padding: 24px 48px 24px 24px;
+    p {
+        height: 21px;
+        white-space: pre;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+}
+.no-data {
+    text-align: center;
 }
 .content-footer {
     width: 100%;

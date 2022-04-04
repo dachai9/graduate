@@ -67,6 +67,7 @@ export default {
 	data() {
 		return {
 			locale,
+			department: sessionStorage.getItem('department'),
 			newStyle: {
 				"padding": "40px",
 				"text-align": "center",
@@ -100,8 +101,9 @@ export default {
 			isSearchSpinShow: false
 		}
 	},
-	beforeMount() {
+	mounted() {
 		if(sessionStorage.getItem('weekly')) {
+			console.log('wekly');
 			this.range.weekly = sessionStorage.getItem('weekly');
 		}
 		if(sessionStorage.getItem('monthly')) {
@@ -127,6 +129,7 @@ export default {
 				})
 			} else {
 				this.isSearchSpinShow = true;
+				searchObj.user = sessionStorage.getItem('user');
 				this.$axios.post('http://127.0.0.1:88/getMyReportData', searchObj).then((res) => {
 					console.log('res', res.data);
 					this.mainData = res.data;
@@ -166,6 +169,7 @@ export default {
 		onhomeReset() {
 			// console.log('点击重置', this.screenName);
 			this.dateValue = [];
+			this.dateString = ['',''];
 			this.screenName = '';
 			this.isScreened = JSON.parse(JSON.stringify({
 				weekly: true,
@@ -173,10 +177,15 @@ export default {
 				seasonal: true,
 				yearly: true
 			}));
+			this.onhomeSearch();
 		},
 		newReport() {
-			this.toPageType = 'new';
-			this.isShowReportModel = true;
+			if(this.department !== 'null') {
+				this.toPageType = 'new';
+				this.isShowReportModel = true;
+			} else {
+				this.$message.info('请先加入部门');
+			}
 		},
 		toCreatReport(range) {
 			this.$router.push(`/report?type=${this.toPageType}&range=${range}`);

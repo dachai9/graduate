@@ -114,21 +114,23 @@ router.post('/updateReportData', (req, res) => {
     // req.body.first_name
     // console.log('req', req);
     if (req.body.change) {
-        var sql = `update reports set title = '${req.body.title}', content = '${req.body.content}', rangeType = '${req.body.range}', saveTime = '${req.body.saveTime}', submitTime = '${req.body.submitTime}', author = '${req.body.author}', tempId = ${req.body.tempId} where reportId = '${req.body.id}'`;
+        var sql = `update reports set title = '${req.body.title}', content = '${req.body.content}', rangeType = '${req.body.range}', saveTime = '${req.body.saveTime}', submitTime = '${req.body.submitTime}', author = '${req.body.author}', tempId = ${req.body.tempId}, shortCut = '${req.body.shortCut}' where reportId = '${req.body.id}'`;
     } else {
-        var sql = `insert into reports (title, content, rangeType, ${req.body.saveTime === '' ? 'submitTime' : 'saveTime'}, author, tempId) values ('${req.body.title}', '${req.body.content}', '${req.body.range}', '${req.body.saveTime === '' ? req.body.submitTime : req.body.saveTime}', '${req.body.author}', ${req.body.tempId});`;
+        var sql = `insert into reports (title, content, rangeType, ${req.body.saveTime === '' ? 'submitTime' : 'saveTime'}, author, tempId, shortCut) values ('${req.body.title}', '${req.body.content}', '${req.body.range}', '${req.body.saveTime === '' ? req.body.submitTime : req.body.saveTime}', '${req.body.author}', ${req.body.tempId}, '${req.body.shortCut}');`;
     }
     var selectSql = `select max(reportId) as id from reports`;
+    console.log('sql', sql);
+    console.log('selectSql', selectSql);
     db.query(sql, (err) => {
         if (err) {
-            return res.send('错误：' + err.message)
+            return res.send('insert错误：' + err.message)
         }
         if (req.body.change) {
             res.send({ id: req.body.id });
         } else {
             db.query(selectSql, (err, data) => {
                 if (err) {
-                    return res.send('错误：' + err.message)
+                    return res.send('获取最大id错误：' + err.message)
                 }
                 res.send(data)
             })
@@ -166,8 +168,10 @@ router.post('/getSomeReportData', (req, res) => {
 // 员工获取符合条件的报告数据
 router.post('/getMyReportData', (req, res) => {
     // req.body.first_name
-    // console.log('req', req);
-    var sql = `select * from reports${req.body.condition ? ' where reportId = ${req.query.id}' : ''} order by submitTime desc`;
+    // console.log('req', req.body.user);
+    var body = req.body;
+    var sql = `select * from reports where author = '${body.user}' and submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc`;
+    console.log('sql', sql);
     db.query(sql, (err, data) => {
         if (err) {
             return res.send('错误：' + err.message)
