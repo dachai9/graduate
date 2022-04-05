@@ -6,6 +6,7 @@
 				<main>
 					<FormatShort :mainData="mainData" @getDraftData="getDraftData" @toggleSpin="toggleSpin"></FormatShort>
 					<!-- 点击加载更多 -->
+			<div class="home-pagination"><a-pagination :current="curPage" :total="totalNum" size="small" @change="onPageChange" /></div>
 				</main>
 			</a-spin>
 		</div>
@@ -27,33 +28,34 @@ export default {
 			mainData: [],
 			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
 			authorName: sessionStorage.getItem('user'),
-			isSearchSpinShow: false
+			isSearchSpinShow: false,
+			curPage: 1,
+			totalNum: 50
 		}
 	},
 	mounted() {
 		this.getDraftData();
 	},
 	methods: {
-		getDraftData() {
+		getDraftData(page) {
 			this.isSearchSpinShow = true;
-			this.$axios.post('http://127.0.0.1:88/getDraftData', {authorName: this.authorName}).then((res) => {
-				// console.log('res', res);
-				this.mainData = res.data;
+			var searchObj = {
+				authorName: this.authorName,
+				page: page || 1
+			}
+			this.$axios.post('http://127.0.0.1:88/getDraftData', searchObj).then((res) => {
+				console.log('searchres', res.data);
+				this.mainData = res.data.data;
+				this.totalNum = res.data.total;
 				this.isSearchSpinShow = false;
 			})
 		},
-		onPickerChange(date, dateString) {
-			console.log('date, dateString', date, dateString);
-			// 传进数据库搜索
-		},
-		onhomeSearch() {
-			console.log('点击搜索');
-		},
-		onhomeReset() {
-			console.log('点击重置');
-		},
 		toggleSpin(state) {
 			this.isSearchSpinShow = state;
+		},
+		onPageChange(page) {
+			this.curPage = page;
+			this.getDraftData(page);
 		}
 	}
 }
@@ -71,6 +73,12 @@ export default {
 		}
 		.ant-card {
 			margin-bottom: 20px;
+		}
+		.ant-spin-nested-loading {
+			height: 100%;
+		}
+		.ant-spin-container {
+			height: 100%;
 		}
 		main {
 			width: 100%;
@@ -99,6 +107,9 @@ export default {
 				float: right;
 				margin-left: 10px;
 			}
+		}
+		.home-pagination {
+			text-align: center;
 		}
 		::-webkit-scrollbar {
 			display: none;

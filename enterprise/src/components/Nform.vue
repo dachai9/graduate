@@ -6,8 +6,8 @@
                     <a-input :size="size" v-model="insertReportData.title" :disabled="type.type === 'detail'" />
                 </a-form-model-item>
                 <a-form-model-item :model="allFormData" v-for="(domain, index) in dynamicForm" :key="index" :label="domain.title" :required="domain.require">
-                    <a-input v-if="domain.name === 'singleLine'" :size="size" v-model="allFormData['singleLine'+index]" :disabled="type.type === 'detail'" />
-                    <a-input v-if="domain.name === 'multiLine'" type="textarea" :size="size" v-model="allFormData['multiLine'+index]" :disabled="type.type === 'detail'" />
+                    <a-input v-if="domain.name === 'singleLine'" :size="size" v-model="allFormData['singleLine'+index]" :title="allFormData['singleLine'+index]" :disabled="type.type === 'detail'" />
+                    <a-input v-if="domain.name === 'multiLine'" type="textarea" :size="size" v-model="allFormData['multiLine'+index]" :title="allFormData['multiLine'+index]" :disabled="type.type === 'detail'" />
                     <a-select v-if="domain.name === 'dropBox'" :size="size" v-model="allFormData['dropBox'+index]" :disabled="type.type === 'detail'">
                         <a-select-option :value="option" v-for="(option, i) in domain.option.split(',')" :key="i">
                             {{option}}

@@ -59,7 +59,7 @@ export default {
 <style scoped lang="less">
 .header-main {
 	position: relative;
-	height: 60px;
+	height: 50px;
 	width: 100%;
 	padding: 0 60px;
 	// border-bottom: 1px solid #57a6ec;
@@ -68,18 +68,18 @@ export default {
 	// background-color: pink;
 	.header-h1 {
 		float: left;
-		font-size: 23px;
+		font-size: 18px;
 		font-weight: 800;
-		line-height: 60px;
+		line-height: 50px;
 		color: #fff;
 		margin: 0;
 		cursor: pointer;
 	}
 	.header-user {
 		float: right;
-		line-height: 60px;
+		line-height: 50px;
 		a {
-			line-height: 60px;
+			line-height: 50px;
 			display: inline-block;
 			color: #fff;
 		}

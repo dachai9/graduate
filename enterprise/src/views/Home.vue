@@ -14,27 +14,31 @@
 				</a-card>
 			</aside>
 			<main>
-				<a-spin :spinning="isSearchSpinShow">
-					<div class="home-search">
-						<div class="report-time">
-							<a-range-picker v-model="dateValue" @change="onPickerChange" :locale="locale"/>
-						</div>
-						<div class="staff-search" v-if="isBoss">
-							<StaffSearch :screenName="screenName" :ishomeStaff="false" width="300px" @searchName="getSearchName"></StaffSearch>
-						</div>
-						<div class="report-search">
-							<a-button type="primary" @click="onhomeSearch">搜索</a-button>
-							<a-button @click="onhomeReset">重置</a-button>
-						</div>
-						<div class="report-div">
-							<a-button v-if="range.weekly" ref="weekly" :type="isScreened.weekly ? 'primary' : 'default'" @click="screenReport('weekly')">周报</a-button>
-							<a-button v-if="range.monthly" ref="monthly" :type="isScreened.monthly ? 'primary' : 'default'" @click="screenReport('monthly')">月报</a-button>
-							<a-button v-if="range.seasonal" ref="seasonal" :type="isScreened.seasonal ? 'primary' : 'default'" @click="screenReport('seasonal')">季报</a-button>
-							<a-button v-if="range.yearly" ref="yearly" :type="isScreened.yearly ? 'primary' : 'default'" @click="screenReport('yearly')">年报</a-button>
-						</div>
+				<div class="home-search">
+					<div class="report-time">
+						<a-range-picker v-model="dateValue" @change="onPickerChange" :locale="locale"/>
 					</div>
+					<div class="staff-search" v-if="isBoss">
+						<StaffSearch :screenName="screenName" :ishomeStaff="false" width="300px" @searchName="getSearchName"></StaffSearch>
+					</div>
+					<div class="report-search">
+						<a-button type="primary" @click="onhomeSearch">搜索</a-button>
+						<a-button @click="onhomeReset">重置</a-button>
+						<a-popconfirm title="是否选择导出全部？" ok-text="确认导出全部" cancel-text="只导出当页" @confirm="exportExcel(true)" @cancel="exportExcel(false)" >
+							<a-button icon="export" title="导出"></a-button>
+						</a-popconfirm>
+					</div>
+					<div class="report-div">
+						<a-button v-if="range.weekly" ref="weekly" :type="isScreened.weekly ? 'primary' : 'default'" @click="screenReport('weekly')">周报</a-button>
+						<a-button v-if="range.monthly" ref="monthly" :type="isScreened.monthly ? 'primary' : 'default'" @click="screenReport('monthly')">月报</a-button>
+						<a-button v-if="range.seasonal" ref="seasonal" :type="isScreened.seasonal ? 'primary' : 'default'" @click="screenReport('seasonal')">季报</a-button>
+						<a-button v-if="range.yearly" ref="yearly" :type="isScreened.yearly ? 'primary' : 'default'" @click="screenReport('yearly')">年报</a-button>
+					</div>
+				</div>
+				<a-spin :spinning="isSearchSpinShow">
 					<FormatShort :mainData="mainData"></FormatShort>
 					<!-- 点击加载更多 -->
+				<div class="home-pagination"><a-pagination :current="curPage" :total="totalNum" size="small" @change="onPageChange" /></div>
 				</a-spin>
 			</main>
 			<a-modal v-model="isShowReportModel" dialogClass="choose-report-model" :getContainer="reportModelContainer" :footer="null" :bodyStyle="reportModelBodyStyle">
@@ -54,8 +58,8 @@ import Headers from '../components/Header'
 // import mainData from '../assets/data.json'
 import FormatShort from '../components/FormatShort.vue'
 import StaffSearch from '../components/StaffSearch'
-// import Spin from '../components/Spin.vue'
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
+
 export default {
 	name: 'home',
 	components: {
@@ -82,6 +86,7 @@ export default {
 			},
 			mainData: [],
 			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
+			user: sessionStorage.getItem('user'),
 			isShowReportModel: false,
 			toPageType: 'new',
 			// 从这里开始是条件筛选
@@ -98,44 +103,48 @@ export default {
 			// 开始 sessionStorage 的模板同步
 			range: {},
 			// 到这里结束
-			isSearchSpinShow: false
+			isSearchSpinShow: false,
+			curPage: 1,
+			totalNum: 50
 		}
 	},
 	mounted() {
-		if(sessionStorage.getItem('weekly')) {
-			console.log('wekly');
-			this.range.weekly = sessionStorage.getItem('weekly');
-		}
-		if(sessionStorage.getItem('monthly')) {
-			this.range.monthly = sessionStorage.getItem('monthly');
-		}
-		if(sessionStorage.getItem('seasonal')) {
-			this.range.seasonal = sessionStorage.getItem('seasonal');
-		}
-		if(sessionStorage.getItem('yearly')) {
-			this.range.yearly = sessionStorage.getItem('yearly');
-		}
-		this.loadReportData({});
+		this.getSessionStorage();
+		this.loadReportData({page: this.curPage});
 	},
 	methods: {
+		getSessionStorage() {
+			if(sessionStorage.getItem('weekly')) {
+				// console.log('wekly');
+				this.range.weekly = sessionStorage.getItem('weekly');
+			}
+			if(sessionStorage.getItem('monthly')) {
+				this.range.monthly = sessionStorage.getItem('monthly');
+			}
+			if(sessionStorage.getItem('seasonal')) {
+				this.range.seasonal = sessionStorage.getItem('seasonal');
+			}
+			if(sessionStorage.getItem('yearly')) {
+				this.range.yearly = sessionStorage.getItem('yearly');
+			}
+		},
 		// 首页加载数据
 		loadReportData(searchObj) {
-			if(this.isBoss) {
-				this.isSearchSpinShow = true;
-				this.$axios.post('http://127.0.0.1:88/getSomeReportData', searchObj).then((res) => {
-					console.log('res', res.data);
-					this.mainData = res.data;
-					this.isSearchSpinShow = false;
-				})
-			} else {
-				this.isSearchSpinShow = true;
-				searchObj.user = sessionStorage.getItem('user');
-				this.$axios.post('http://127.0.0.1:88/getMyReportData', searchObj).then((res) => {
-					console.log('res', res.data);
-					this.mainData = res.data;
-					this.isSearchSpinShow = false;
-				})
-			}
+			this.isSearchSpinShow = true;
+			this.isBoss ? "" : searchObj.user = this.user;
+
+			// 先获取报告总数
+			// this.$axios.post('http://127.0.0.1:88/getReportSum', searchObj).then((res) => {
+			// 	console.log('获取到的报告总数', res.data);
+			// 	this.totalNum = res.data[0].total;
+			// })
+			// 获取具体数据
+			this.$axios.post('http://127.0.0.1:88/getSomeReportData', searchObj).then((res) => {
+				console.log('res', res.data);
+				this.mainData = res.data.data;
+				this.totalNum = res.data.total;
+				this.isSearchSpinShow = false;
+			})
 		},
 		reportModelContainer() {
 			return document.getElementsByClassName('home-content')[0];
@@ -163,7 +172,7 @@ export default {
 					this.isScreenedArr.push(key);
 				}
 			}
-			this.loadReportData({dateString: this.dateString, screenName: this.screenName, isScreenedArr: this.isScreenedArr});
+			this.loadReportData({dateString: this.dateString, screenName: this.screenName, isScreenedArr: this.isScreenedArr, page: this.curPage});
 			// console.log('点击搜索', this.dateString, this.screenName, this.isScreenedArr);
 		},
 		onhomeReset() {
@@ -197,6 +206,26 @@ export default {
 		openDrafts() {
 			this.$router.push('/draft');
 		},
+		onPageChange(page) {
+			// console.log('改变页码', page, pageSize);
+			this.curPage = page;
+			this.onhomeSearch(page);
+		},
+		// 导出全部
+		exportExcel(isAll) {
+			var exportObj = {
+				isAll: isAll,
+				isBoss: this.isBoss,
+				user: this.user,
+			}
+			if(!isAll) {
+				exportObj.data = this.mainData
+			}
+			this.$axios.post('http://127.0.0.1:88/exportExcel', exportObj).then((res) => {
+				console.log('导出'+isAll+'数据返回', res.data);
+			})
+			// console.log('导出全部');
+		},
 	}
 }
 </script>
@@ -204,8 +233,8 @@ export default {
 .home {
 	height: 100%;
 	.home-content {
-		height: 90%;
-		padding: 30px 30px;
+		height: 93%;
+		padding: 25px 30px;
 		.home-aside {
 			float: left;
 			width: 14%;
@@ -217,6 +246,7 @@ export default {
 			margin-bottom: 20px;
 		}
 		main {
+			position: relative;
 			width: 85%;
 			height: 100%;
 			padding: 20px 30px;
@@ -243,6 +273,13 @@ export default {
 			.report-search {
 				float: right;
 				margin-left: 10px;
+			}
+			.ant-spin-nested-loading {
+				// height: 85%;
+				overflow-y: auto;
+			}
+			.home-pagination {
+				text-align: center;
 			}
 		}
 		.model-cards-box {

@@ -27,6 +27,9 @@ export default {
 			staffData: []
         }
     },
+	mounted() {
+		this.mStaffGetName();
+	},
     methods: {
 		mStaffGetName(val) {
 			// this.staffArr = !val ? [] : [val + 'a', val + 'b'];
@@ -38,7 +41,7 @@ export default {
 					arr.push(item.staffName)
 				})
 				// arr.push()
-				this.staffArr = !val ? [] : arr;
+				this.staffArr = arr;
 				this.staffData = res.data;
 				this.$emit('toggleSpin', false);
 				// console.log(this.staffData);

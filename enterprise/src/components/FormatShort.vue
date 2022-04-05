@@ -1,11 +1,25 @@
 <template>
 	<div class="short-main">
-		<a-card v-for="data in mainData" :key="data.reportId" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)">
+		<!-- <a-card v-for="data in mainData" :key="data.reportId" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)"> -->
+		<a-card v-for="data in mainData" :key="data.reportId" hoverable :bodyStyle="shortBodyStyle" @click="openDetail(data)">
+            <!-- <a-card-meta title="Europe Street beat"> -->
+            <!-- <a-card-meta> -->
+                <!-- <template slot="title"> -->
             <div class="content-main">
                 <!-- <p>{{getContent(data)}}</p> -->
-                <p :title="data.shortCut">{{data.shortCut}}</p>
+                <span class="short-type">{{typeToName[data.rangeType]}}</span>
+                <p>{{data.title}}</p>
+                <!-- <p :title="data.shortCut">{{data.shortCut}}</p> -->
+                <a-popconfirm title="确定删掉该报告？" ok-text="是的" cancel-text="不了吧" v-if="path === '/draft'" @confirm="deleteReport(data.reportId)">
+                    <a-button title="删除" class="delete-icon" v-if="path === '/draft'" icon="delete" type="danger" ghost size="small" @click="onDeleteClick"></a-button>
+                </a-popconfirm>
+                <span v-if="path === '/home'">{{data.submitTime}}</span>
+                <span v-if="path === '/draft'">{{data.saveTime}}</span>
+                <span class="short-author">{{data.author}}</span>
             </div>
-			<div class="content-footer">
+                <!-- </template>
+            </a-card-meta> -->
+			<!-- <div class="content-footer">
                 <a-popconfirm title="确定删掉该报告？" ok-text="是的" cancel-text="不了吧" @confirm="deleteReport(data.reportId)">
                     <a-button title="删除" class="delete-icon" v-if="path === '/draft'" icon="delete" type="danger" ghost size="small" @click="onDeleteClick"></a-button>
                 </a-popconfirm>
@@ -13,7 +27,7 @@
                 <span v-if="path === '/home'">{{data.submitTime}}</span>
                 <span v-if="path === '/draft'">{{data.saveTime}}</span>
                 <span class="short-author">{{data.author}}</span>
-            </div>
+            </div> -->
 		</a-card>
         <div class="no-data" v-if="!mainData.length">
             <a-card>暂无数据</a-card>
@@ -61,7 +75,7 @@ export default {
             this.$axios.post('http://127.0.0.1:88/deleteAReport', {id: id}).then(() => {
                 // console.log('res', res.data);
                 // 重新请求数据，因为不是
-                this.$emit('getDraftData');
+                this.$emit('getSumDraftData');
                 this.$emit('toggleSpin', false);
             })
         }
@@ -71,13 +85,53 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
+.short-main {
+    overflow-y: auto;
+}
 .content-main {
-    padding: 24px 48px 24px 24px;
+    padding: 18px 18px 15px;
+    overflow: hidden;
     p {
+        // display: inline-block;
+        float: left;
         height: 21px;
         white-space: pre;
         text-overflow: ellipsis;
         overflow: hidden;
+        font-weight: 800;
+        font-size: 16px;
+    }
+    span {
+        margin-left: 8px;
+        float: right;
+        padding: 2px 5px;
+        font-size: 12px;
+    }
+    span::after {
+        content: '';
+        display: inline-block;
+        height: 0;
+        width: 0;
+        clear: both;
+    }
+    .short-author {
+        background-color: #57a6ec;
+        color: #fff;
+        border-radius: 15px;
+    }
+    .short-type {
+        float: left;
+        border: 1px solid #57a6ec;
+        border-radius: 5px;
+        margin-left: 0;
+        margin-right: 15px;
+    }
+    .delete-icon {
+        float: right;
+        margin-left: 10px;
+        border: none;
+        box-shadow: none;
+        margin-top: -3px;;
     }
 }
 .no-data {
