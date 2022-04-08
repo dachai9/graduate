@@ -34,7 +34,7 @@ export default {
 		mStaffGetName(val) {
 			// this.staffArr = !val ? [] : [val + 'a', val + 'b'];
 			this.$emit('toggleSpin', true);
-			this.$axios.post('http://127.0.0.1:88/searchStaff', {staffName: val}).then((res) => {
+			this.$axios.post('/searchStaff', {staffName: val}).then((res) => {
 				// console.log('res', res.data);
 				var arr = [];
 				res.data.forEach(item => {

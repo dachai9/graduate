@@ -35,8 +35,9 @@
 						<a-button v-if="range.yearly" ref="yearly" :type="isScreened.yearly ? 'primary' : 'default'" @click="screenReport('yearly')">年报</a-button>
 					</div>
 				</div>
+				<div v-if="isBoss" class="all-read" @click="setAllRead">全部标记为已读</div>
 				<a-spin :spinning="isSearchSpinShow">
-					<FormatShort :mainData="mainData"></FormatShort>
+					<FormatShort :mainData="mainData" :isRead="isRead" @readReport="readReport"></FormatShort>
 					<!-- 点击加载更多 -->
 				<div class="home-pagination"><a-pagination :current="curPage" :total="totalNum" size="small" @change="onPageChange" /></div>
 				</a-spin>
@@ -71,6 +72,7 @@ export default {
 	data() {
 		return {
 			locale,
+			isRead: JSON.parse(sessionStorage.getItem('isRead')),
 			department: sessionStorage.getItem('department'),
 			newStyle: {
 				"padding": "40px",
@@ -134,12 +136,12 @@ export default {
 			this.isBoss ? "" : searchObj.user = this.user;
 
 			// 先获取报告总数
-			// this.$axios.post('http://127.0.0.1:88/getReportSum', searchObj).then((res) => {
+			// this.$axios.post('/getReportSum', searchObj).then((res) => {
 			// 	console.log('获取到的报告总数', res.data);
 			// 	this.totalNum = res.data[0].total;
 			// })
 			// 获取具体数据
-			this.$axios.post('http://127.0.0.1:88/getSomeReportData', searchObj).then((res) => {
+			this.$axios.post('/getSomeReportData', searchObj).then((res) => {
 				console.log('res', res.data);
 				this.mainData = res.data.data;
 				this.totalNum = res.data.total;
@@ -211,8 +213,34 @@ export default {
 			this.curPage = page;
 			this.onhomeSearch(page);
 		},
+		// 全部设为已读
+		setAllRead() {
+			this.isSearchSpinShow = true;
+			this.$axios.post('/setAllRead', {user: this.user}).then(res => {
+				console.log('res', res.data);
+				// 更新缓存
+                sessionStorage.removeItem('isRead');
+                sessionStorage.setItem('isRead', JSON.stringify(res.data));
+				// 更新组件值
+				this.isRead = res.data;
+				this.isSearchSpinShow = false;
+				this.$message.success('成功标记全部为已读');
+			})
+		},
+		// 点击报告，更新已读列表
+		readReport(reportId) {
+            this.isRead.push(reportId);
+            sessionStorage.removeItem('isRead');
+            sessionStorage.setItem('isRead', JSON.stringify(this.isRead));
+
+            // 更新数据库
+            this.$axios.post('/updateIsRead', {user: this.user, isRead: JSON.stringify(this.isRead)}).then((res) => {
+                console.log('res', res);
+            })
+		},
 		// 导出全部
 		exportExcel(isAll) {
+			this.isSearchSpinShow = true;
 			var exportObj = {
 				isAll: isAll,
 				isBoss: this.isBoss,
@@ -221,8 +249,10 @@ export default {
 			if(!isAll) {
 				exportObj.data = this.mainData
 			}
-			this.$axios.post('http://127.0.0.1:88/exportExcel', exportObj).then((res) => {
-				console.log('导出'+isAll+'数据返回', res.data);
+			this.$axios.post('/exportExcel', exportObj).then((res) => {
+				// console.log('导出'+isAll+'数据返回', res.data);
+				this.isSearchSpinShow = false;
+				res.data === 'success' ? this.$message.success('导出成功~') : this.$message.error('导出失败');
 			})
 			// console.log('导出全部');
 		},
@@ -274,10 +304,10 @@ export default {
 				float: right;
 				margin-left: 10px;
 			}
-			.ant-spin-nested-loading {
-				// height: 85%;
-				overflow-y: auto;
-			}
+			// .ant-spin-nested-loading {
+			// 	// height: 85%;
+			// 	overflow-y: auto;
+			// }
 			.home-pagination {
 				text-align: center;
 			}
@@ -295,6 +325,15 @@ export default {
 		// }
 		::-webkit-scrollbar {
 			display: none;
+		}
+	}
+	.all-read {
+		color: #57a6ec;
+		font-size: 12px;
+		cursor: pointer;
+		margin: -8px 0 5px 0;
+		&:hover {
+			color: #87c3f7;
 		}
 	}
 }

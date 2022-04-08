@@ -2,6 +2,7 @@
 	<div class="nReport">
 		<Header></Header>
 		<div class="nReport-content">
+			<a-button type="dashed" size="small" class="go-back" @click="goBack">返回</a-button>
 			<main class="nReport-main">
 				<a-spin :spinning="isSearchSpinShow">
 					<Nform v-if="path.type==='new'" :type="path" :dynamicForm="formatData" :formatElseData="formatElseData" @toggleSpin="toggleSpin"></Nform>
@@ -65,7 +66,7 @@ export default {
 			// console.log('weekly', rangeId);
 			// 加载
 			this.isSearchSpinShow = true;
-			this.$axios.get(`http://127.0.0.1:88/getTemp?id=${rangeId}`).then((res) => {
+			this.$axios.get(`/getTemp?id=${rangeId}`).then((res) => {
 				// console.log('res', res.data[0]);
 				for(const [key, value] of Object.entries(JSON.parse(res.data[0].temp))) {
 					if(key === 'size') {
@@ -102,7 +103,14 @@ export default {
 		},
 		toggleSpin(state) {
 			this.isSearchSpinShow = state;
-		}
+		},
+        goBack() {
+			if(this.path.type === 'draft') {
+				this.$router.push('/draft');
+			} else {
+				this.$router.push('/home');
+			}
+        }
 	}
 }
 </script>
@@ -125,6 +133,15 @@ export default {
                 margin: 0 10px;
             }
         }
+		.go-back {
+			// border: none;
+			// font-size: 25px;
+			// color: #57a6ec;
+			position: absolute;
+			left: 150px;
+			top: 100px;
+			z-index: 10;
+		}
 		::-webkit-scrollbar {
 			display: none;
         }

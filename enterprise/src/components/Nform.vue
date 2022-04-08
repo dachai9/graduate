@@ -106,7 +106,7 @@ export default {
             // console.log('formatElseData', this.formatElseData, this.formatElseData.title, this.formatElseData.size);
             // this.insertReportData.title = this.formatElseData.title;
             this.$emit('toggleSpin', true);
-			this.$axios.get(`http://127.0.0.1:88/getReportData?id=${this.path.id}`).then((res) => {
+			this.$axios.get(`/getReportData?id=${this.path.id}`).then((res) => {
 				console.log('获取到的数据', res);
 				this.detailData = res.data[0];
 				this.insertReportData.title = this.detailData.title;
@@ -165,7 +165,7 @@ export default {
             this.insertReportData.content = JSON.stringify(changedData);
             // console.log('this.insertReportData', JSON.stringify(changedData));
             // 提交数据
-            this.$axios.post('http://127.0.0.1:88/updateReportData', this.insertReportData).then((res) => {
+            this.$axios.post('/updateReportData', this.insertReportData).then((res) => {
                 // console.log('res', res.data[0].id);
                 // 跳转到详情
                 if(this.type.type === 'draft') {
@@ -194,7 +194,7 @@ export default {
         deleteReport() {
             // console.log('确定');
             this.$emit('toggleSpin', true);
-            this.$axios.post('http://127.0.0.1:88/deleteAReport', {id: this.type.id}).then(() => {
+            this.$axios.post('/deleteAReport', {id: this.type.id}).then(() => {
                 // console.log('res', res.data);
                 this.$router.push('/draft');
                 this.$emit('toggleSpin', false);

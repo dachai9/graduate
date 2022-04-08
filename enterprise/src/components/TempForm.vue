@@ -199,10 +199,10 @@ export default {
                 }
             })
 			console.log('点击保存并发布', this.dynamicForm, JSON.stringify(this.nReportForm));
-            this.$axios.post('http://127.0.0.1:88/insertTemp', {temp: JSON.stringify(this.nReportForm), range: this.range, department: sessionStorage.getItem('department')}).then((response) => {
+            this.$axios.post('/insertTemp', {temp: JSON.stringify(this.nReportForm), range: this.range, department: sessionStorage.getItem('department')}).then((response) => {
                 console.log('保存并发布之后的执行结果', response);
                 // 更新缓存
-                this.$axios.post(`http://127.0.0.1:88/getTemp`, {depart: sessionStorage.getItem('department')}).then((res) => {
+                this.$axios.post(`/getTemp`, {depart: sessionStorage.getItem('department')}).then((res) => {
                     console.log('查询该部门的报告类型对应模板', res);
                     if(sessionStorage.getItem(this.range)) {
                         sessionStorage.removeItem(this.range);

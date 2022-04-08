@@ -88,7 +88,7 @@ router.post('/getSomeReportData', (req, res) => {
             }
             // res.send(sum)
             allData.total = total[0].total;
-            console.log('allData', allData);
+            // console.log('allData', allData);
             res.send(allData);
         })
     })
@@ -144,6 +144,57 @@ router.post('/getDraftData', (req, res) => {
             }
             allData.total = total[0].total;
             res.send(allData);
+        })
+    })
+})
+
+// 获取已读
+router.get('/getIsRead', (req, res) => {
+    console.log('req', req, req.query.name);
+    var sql = `select isRead from allStaff where staffName = '${req.query.name}'`;
+    console.log('sql', sql);
+    db.query(sql, (err, data) => {
+        if (err) {
+            res.send('错误：', err.message)
+        }
+        res.send(data)
+    })
+})
+
+// 更新已读
+router.post('/updateIsRead', (req, res) => {
+    // console.log('req', req, req.body.user);
+    var sql = `update allStaff set isRead = '${req.body.isRead}' where staffName = '${req.body.user}'`;
+    console.log('sql', sql);
+    db.query(sql, (err) => {
+        if (err) {
+            res.send('错误：', err.message)
+        }
+        res.send('success')
+    })
+})
+
+// 全部设为已读
+router.post('/setAllRead', (req, res) => {
+    var sql = `select reportId from reports where author <> '${req.body.user}' and submitTime <> ''`;
+    console.log('setAllRead: sql', sql);
+    db.query(sql, (err, data) => {
+        if (err) {
+            res.send('错误：', err.message)
+        }
+        var dataArr = [];
+        data.forEach(item => {
+            dataArr.push(item.reportId);
+        })
+        console.log('data', data, dataArr);
+
+        var isReadSql = `update allStaff set isRead = '${JSON.stringify(dataArr)}' where staffName = '${req.body.user}'`;
+        console.log('setAllRead: isReadSql', isReadSql);
+        db.query(isReadSql, (err) => {
+            if (err) {
+                res.send('错误：', err.message)
+            }
+            res.send(JSON.stringify(dataArr))
         })
     })
 })

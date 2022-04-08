@@ -43,13 +43,7 @@ export default {
 		},
 		logout() {
 			this.$router.push('/');
-			sessionStorage.removeItem('user');
-			sessionStorage.removeItem('isBoss');
-			sessionStorage.removeItem('department');
-			sessionStorage.removeItem('weekly');
-			sessionStorage.removeItem('monthly');
-			sessionStorage.removeItem('seasonal');
-			sessionStorage.removeItem('yearly');
+			sessionStorage.clear();
 		}
 	}
 }

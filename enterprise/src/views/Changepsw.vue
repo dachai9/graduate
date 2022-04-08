@@ -75,7 +75,7 @@ export default {
                     console.log('验证成功', valid);
                     // 添加数据库判断
                     // 跳转
-                    this.$axios.post('http://127.0.0.1:88/changepsw', this.pswForm).then((response) => {
+                    this.$axios.post('/changepsw', this.pswForm).then((response) => {
                         console.log('response', response.data);
                         if(response.data === 'success') {
                             this.$router.push('/home');

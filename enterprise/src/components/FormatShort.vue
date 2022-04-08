@@ -2,9 +2,8 @@
 	<div class="short-main">
 		<!-- <a-card v-for="data in mainData" :key="data.reportId" hoverable :title="data.title" :bodyStyle="shortBodyStyle" @click="openDetail(data)"> -->
 		<a-card v-for="data in mainData" :key="data.reportId" hoverable :bodyStyle="shortBodyStyle" @click="openDetail(data)">
-            <!-- <a-card-meta title="Europe Street beat"> -->
-            <!-- <a-card-meta> -->
-                <!-- <template slot="title"> -->
+            <!-- 未读标签 -->
+            <div class="not-read" v-if="!(data.author === user || isRead.includes(data.reportId))"></div>
             <div class="content-main">
                 <!-- <p>{{getContent(data)}}</p> -->
                 <span class="short-type">{{typeToName[data.rangeType]}}</span>
@@ -17,17 +16,6 @@
                 <span v-if="path === '/draft'">{{data.saveTime}}</span>
                 <span class="short-author">{{data.author}}</span>
             </div>
-                <!-- </template>
-            </a-card-meta> -->
-			<!-- <div class="content-footer">
-                <a-popconfirm title="确定删掉该报告？" ok-text="是的" cancel-text="不了吧" @confirm="deleteReport(data.reportId)">
-                    <a-button title="删除" class="delete-icon" v-if="path === '/draft'" icon="delete" type="danger" ghost size="small" @click="onDeleteClick"></a-button>
-                </a-popconfirm>
-                <span class="short-type">{{typeToName[data.rangeType]}}</span>
-                <span v-if="path === '/home'">{{data.submitTime}}</span>
-                <span v-if="path === '/draft'">{{data.saveTime}}</span>
-                <span class="short-author">{{data.author}}</span>
-            </div> -->
 		</a-card>
         <div class="no-data" v-if="!mainData.length">
             <a-card>暂无数据</a-card>
@@ -39,10 +27,13 @@
 export default {
 	name: 'short',
 	props: {
-		mainData: Array
+		mainData: Array,
+        isRead: Array
 	},
     data() {
         return {
+            // isRead: JSON.parse(sessionStorage.getItem('isRead')),
+            user: sessionStorage.getItem('user'),
             shortBodyStyle: {
                 "padding": "0"
             },
@@ -57,12 +48,16 @@ export default {
     },
     methods: {
         // getContent(data) {
-            
         //     return JSON.stringify(JSON.parse(data.content).d);
         // },
         openDetail(data) {
-            console.log('点击进入详情', data);
+            // console.log('点击进入详情', data, this.isRead);
             this.$router.push(`/report?type=${this.path === '/draft' ? 'draft' : 'detail'}&range=${data.rangeType}&id=${data.reportId}&temp=${data.tempId}`);
+            
+            // 处理已未读
+            if(!(data.author === this.user || this.isRead.includes(data.reportId))) {
+                this.$emit('readReport', data.reportId);
+            }
         },
         onDeleteClick(e) {
             // console.log(e);
@@ -72,7 +67,7 @@ export default {
         deleteReport(id) {
             // console.log('删除的报告id', id);
             this.$emit('toggleSpin', true);
-            this.$axios.post('http://127.0.0.1:88/deleteAReport', {id: id}).then(() => {
+            this.$axios.post('/deleteAReport', {id: id}).then(() => {
                 // console.log('res', res.data);
                 // 重新请求数据，因为不是
                 this.$emit('getSumDraftData');
@@ -86,7 +81,16 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
 .short-main {
-    overflow-y: auto;
+    // overflow-y: auto;
+    .not-read {
+        position: absolute;
+        right: -5px;
+        top: -5px;
+        width: 10px;
+        height: 10px;
+        border-radius: 100%;
+        background-color: #57a6ec;
+    }
 }
 .content-main {
     padding: 18px 18px 15px;

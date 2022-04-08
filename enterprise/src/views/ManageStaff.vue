@@ -84,7 +84,7 @@ export default {
 		nStaffConfirm(val) {
 			this.isSearchSpinShow = true;
 			console.log('确定添加该员工', val);
-			this.$axios.post('http://127.0.0.1:88/updateStaff', {staffId: val.staffId, department: this.department}).then((res) => {
+			this.$axios.post('/updateStaff', {staffId: val.staffId, department: this.department}).then((res) => {
 				console.log('res', res);
 				this.$message.success('添加成功');
 				this.isSearchSpinShow = false;
@@ -105,7 +105,7 @@ export default {
 		lStaffConfirm(val) {
 			this.isSearchSpinShow = true;
 			console.log('确定移出该员工', val);
-			this.$axios.post('http://127.0.0.1:88/updateStaff', {staffId: val.staffId, department: null}).then((res) => {
+			this.$axios.post('/updateStaff', {staffId: val.staffId, department: null}).then((res) => {
 				console.log('res', res);
 				this.$message.success('移出成功');
 				this.isSearchSpinShow = false;
