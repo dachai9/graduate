@@ -68,9 +68,23 @@ router.post('/getSomeReportData', (req, res) => {
     // console.log('req', req);
     var body = req.body;
     // var isScreenedStr = body.isScreenedArr.join(',');
-    var sql = `select * from reports where${body.user ? " author = '" + body.user + "' and" : ""}${body.screenName ? " author like '%" + body.screenName + "%' and " : ""} submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc${body.page ? " limit " + (body.page - 1) * 10 + ",10" : ""}`;
+    var sql = '';
+    var sumSql = '';
+    if (body.user) {
+        sql = `select * from reports where author = '${body.user}' and submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc${body.page ? " limit " + (body.page - 1) * 10 + ",10" : ""}`;
 
-    var sumSql = `select COUNT(*) as total from reports where${body.user ? " author = '" + body.user + "' and" : ""}${body.screenName ? " author like '%" + body.screenName + "%' and " : ""} submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc`;
+        sumSql = `select COUNT(*) as total from reports where author = '${body.user}' and submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc`;
+
+    } else {
+        sql = `select * from reports where${body.screenName ? " author like '%" + body.screenName + "%' and " : " author in (select staffName from allStaff where department = '" + body.department + "') and"} submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc${body.page ? " limit " + (body.page - 1) * 10 + ",10" : ""}`;
+
+        sumSql = `select COUNT(*) as total from reports where${body.screenName ? " author like '%" + body.screenName + "%' and " : " author in (select staffName from allStaff where department = '" + body.department + "') and"} submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc`;
+
+        // author in (select staffName from allstaff where department = '${req.body.department}')
+    }
+    // var sql = `select * from reports where${body.user ? " author = '" + body.user + "' and" : ""}${body.screenName ? " author like '%" + body.screenName + "%' and " : ""} submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc${body.page ? " limit " + (body.page - 1) * 10 + ",10" : ""}`;
+
+    // var sumSql = `select COUNT(*) as total from reports where${body.user ? " author = '" + body.user + "' and" : ""}${body.screenName ? " author like '%" + body.screenName + "%' and " : ""} submitTime <> ''${body.isScreenedArr ? " and rangeType in ('" + body.isScreenedArr.join('\',\'') + "')" : ""}${(body.dateString && body.dateString[0] != '') ? " and submitTime between '" + body.dateString[0] + " 00:00:00' and '" + body.dateString[1] + " 23:59:59'" : ""} order by submitTime desc`;
 
     console.log('getSomeReportData: sql', sql);
     console.log('getSomeReportData: sum', sumSql);

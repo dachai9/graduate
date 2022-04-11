@@ -148,6 +148,7 @@ export default {
 		loadReportData(searchObj) {
 			this.isSearchSpinShow = true;
 			this.isBoss ? "" : searchObj.user = this.user;
+			this.isBoss ? searchObj.department = this.department : "";
 
 			// 先获取报告总数
 			// this.$axios.post('/getReportSum', searchObj).then((res) => {
