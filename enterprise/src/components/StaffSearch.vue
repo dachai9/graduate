@@ -1,6 +1,6 @@
 <template>
 	<div class="staffSearch-main">
-        <a-auto-complete v-model="staffName" :data-source="staffArr" :style="`width: ${width}`" placeholder="请输入员工工号或姓名" @change="mStaffGetName(staffName)" />
+        <a-auto-complete v-model="staffName" :data-source="staffArr" :style="`width: ${width}`" placeholder="请输入员工工号或姓名" />
         <a-button type="primary" icon="search" @click="mStaffSearch" v-if="ishomeStaff"></a-button>
 	</div>
 </template>
@@ -32,10 +32,11 @@ export default {
 	},
     methods: {
 		mStaffGetName(val) {
+			console.log('查询员工', val);
 			// this.staffArr = !val ? [] : [val + 'a', val + 'b'];
 			this.$emit('toggleSpin', true);
-			this.$axios.post('/searchStaff', {staffName: val}).then((res) => {
-				// console.log('res', res.data);
+			this.$axios.post('/searchStaff', {staffName: val || ''}).then((res) => {
+				console.log('res', res.data);
 				var arr = [];
 				res.data.forEach(item => {
 					arr.push(item.staffName)
@@ -43,12 +44,14 @@ export default {
 				// arr.push()
 				this.staffArr = arr;
 				this.staffData = res.data;
+				this.$emit('getSearchData', this.staffData);
 				this.$emit('toggleSpin', false);
 				// console.log(this.staffData);
 			})
 		},
 		mStaffSearch() {
 			// console.log('val', this.staffName);
+			this.mStaffGetName(this.staffName);
             // 返回搜索结果数据集
             this.$emit('getSearchData', this.staffData);
 		},

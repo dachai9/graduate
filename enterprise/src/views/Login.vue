@@ -79,6 +79,15 @@ export default {
                                     }
                                     this.isSearchSpinShow = false;
                                 })
+                            } else {
+                                if(response.data[0].psw === '123') {
+                                    this.$message.info('请先修改密码');
+                                    this.$router.push('/changepsw');
+                                }else {
+                                    this.$router.push('/home');
+                                    // this.$router.push(0);
+                                }
+                                this.isSearchSpinShow = false;
                             }
                         } else {
                             this.$message.error('工号或密码输入错误！');

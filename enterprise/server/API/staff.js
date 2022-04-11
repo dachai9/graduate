@@ -6,6 +6,7 @@ let db = require('../db/index')
 router.post('/searchStaff', (req, res) => {
     // req.body.first_name
     var sql = `select * from allstaff where staffName like '%${req.body.staffName}%' or staffId = '${req.body.staffName}'`
+    console.log('sql', sql);
     db.query(sql, (err, data) => {
         if (err) {
             return res.send('错误：' + err.message)

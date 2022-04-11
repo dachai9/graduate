@@ -26,13 +26,15 @@
                     <a-switch v-if="domain.name === 'switchBox'" :size="size" />
                     <a-date-picker :locale="locale" v-if="domain.name === 'datePickerBox'" show-time type="date" :size="size" />
                     <a-range-picker :locale="locale" v-if="domain.name === 'rangeBox'" show-time type="date" :size="size" />
-                    <a-icon type="up-square-o" @click="moveUp(index)" :style="{'fontSize': '20px', 'right': '-50px', 'color': '#999'}"/>
-                    <a-icon type="down-square" @click="moveDown(index)" :style="{'fontSize': '20px', 'right': '-90px', 'color': '#999'}" />
-                    <a-icon type="minus-square" @click="removeDomain(index)" :style="{'fontSize': '20px', 'right': '-130px', 'color': '#999'}" />
+                    <div v-if="path.hash == 1">
+                        <a-icon type="up-square-o" @click="moveUp(index)" :style="{'fontSize': '20px', 'right': '-50px', 'color': '#999'}"/>
+                        <a-icon type="down-square" @click="moveDown(index)" :style="{'fontSize': '20px', 'right': '-90px', 'color': '#999'}" />
+                        <a-icon type="minus-square" @click="removeDomain(index)" :style="{'fontSize': '20px', 'right': '-130px', 'color': '#999'}" />
+                    </div>
                 </a-form-model-item>
             </a-form-model>
             
-            <div class="btn-group">
+            <div class="btn-group" v-if="path.hash == 1">
                 <a-button ref="changeSize" @click="changeSize">字体大小</a-button>
                 <a-button ref="singleLine" @click="newFormItemPopup('singleLine')">单行输入框</a-button>
                 <a-button ref="multiLine" @click="newFormItemPopup('multiLine')">多行输入框</a-button>
@@ -67,26 +69,51 @@
                     </div> -->
                 </div>
             </a-modal>
+            <a-modal v-model="isShowTempTitle" title="提示" @ok="creatTempConfirm" cancelText="取消">
+                <div>
+                    <a-form-model :label-col="{span: 4}" :wrapper-col="{span: 14}">
+                        <a-form-model-item label="模板名称" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <a-input type="text" v-model="tempTitle"></a-input>
+                        </a-form-model-item>
+                    </a-form-model>
+                </div>
+            </a-modal>
         </main>
-        <footer>
-            <a-button type="primary" @click="saveTemplateToSubmit">保存并发布</a-button>
+        <footer v-if="path.hash == 1">
+            <a-button type="default" @click="saveTemplateToDraft" style="margin-right: 10px">保存到草稿箱</a-button>
+            <a-button type="primary" @click="saveTemplateToSubmit" style="margin-right: 10px">保存并发布</a-button>
+            <a-button v-if="path.temp" type="danger" @click="deleteATemp">删除</a-button>
+        </footer>
+        <footer v-if="path.hash != 1">
+            <a-button type="default" @click="goBack">返回首页</a-button>
         </footer>
 	</div>
 </template>
 
 <script>
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
+import moment from 'moment'
 export default {
 	name: 'tempform',
 	props: {
         range: String,
         dynamicForm: Array,
-        formatElseData: Object
+        formatElseData: Object,
+        // edit: String,
+        title: String
 	},
     data() {
+		var path = {};
+		location.search.slice(1, location.search.length).split('&').forEach((item) => {
+			path[item.split('=')[0]] = item.split('=')[1];
+		})
+		path.hash = location.hash ? location.hash.replace('#', '') : '';
+		console.log('path', path);
         // let range = this.formatElseData.range;
         return {
             locale,
+            path,
             labelCol: { span: 5 },
             wrapperCol: { span: 14 },
             size: this.formatElseData.size || 'default',
@@ -116,7 +143,15 @@ export default {
                 'switchBox': 'j',
                 'datePickerBox': 't',
                 'rangeBox': 'mt'
-            }
+            },
+            isShowTempTitle: false,
+            isDraft: false,
+            tempTitle: this.title
+        }
+    },
+    watch: {
+        title: function(val) {
+            this.tempTitle = val;
         }
     },
     methods: {
@@ -176,8 +211,7 @@ export default {
         removeDomain(index) {
             this.dynamicForm.splice(index, 1);
         },
-		saveTemplateToSubmit() {
-            this.$emit('toggleSpin', true);
+        handleData() {
             // 重置
             this.nReportForm = JSON.parse(JSON.stringify({
                 range: this.range,
@@ -198,22 +232,120 @@ export default {
                     this.nReportForm[this.formDatabase[item.name]].push(`${item.require}&@#${i++}&@#${item.title}&@#${item.option}`);
                 }
             })
-			console.log('点击保存并发布', this.dynamicForm, JSON.stringify(this.nReportForm));
-            this.$axios.post('/insertTemp', {temp: JSON.stringify(this.nReportForm), range: this.range, department: sessionStorage.getItem('department')}).then((response) => {
-                console.log('保存并发布之后的执行结果', response);
-                // 更新缓存
-                this.$axios.post(`/getTemp`, {depart: sessionStorage.getItem('department')}).then((res) => {
-                    console.log('查询该部门的报告类型对应模板', res);
-                    if(sessionStorage.getItem(this.range)) {
-                        sessionStorage.removeItem(this.range);
-                    }
-                    sessionStorage.setItem(this.range, res.data[0][this.range]);
-                }).then(() => {
-                    this.$router.push('/home');
+			console.log('处理数据后', this.dynamicForm, JSON.stringify(this.nReportForm));
+            console.log('this.tempTitle', this.tempTitle);
+            console.log('this.title', this.title);
+        },
+		saveTemplateToSubmit() {
+            this.isDraft = false;
+            this.$emit('toggleSpin', true);
+            this.handleData();
+            if(this.tempTitle) {
+                var insertObj = {
+                    tempId: this.formatElseData.tempId,
+                    temp: JSON.stringify(this.nReportForm),
+                    author: sessionStorage.getItem('user'),
+                    submitTime: new moment().format('YYYY-MM-DD HH:mm:ss'),
+                    title: this.tempTitle,
+                    range: this.range,
+                    department: sessionStorage.getItem('department')
+                }
+                this.$axios.post('/updateTemp', insertObj).then((response) => {
+                    console.log('保存并发布之后的执行结果', response);
+                    // 更新缓存
+                    this.$axios.post(`/getTemp`, {depart: sessionStorage.getItem('department')}).then((res) => {
+                        console.log('查询该部门的报告类型对应模板', res);
+                        if(sessionStorage.getItem(this.range)) {
+                            sessionStorage.removeItem(this.range);
+                        }
+                        sessionStorage.setItem(this.range, res.data[0][this.range]);
+                        this.$router.push(`/home`);
+                        this.$emit('toggleSpin', false);
+                    })
+                })
+            } else {
+                this.isShowTempTitle = true;
+                this.$emit('toggleSpin', false);
+            }
+		},
+        // 保存到草稿箱
+        saveTemplateToDraft() {
+            this.isDraft = true;
+            this.$emit('toggleSpin', true);
+            this.handleData();
+            if(this.tempTitle) {
+                var updateObj = {
+                    tempId: this.formatElseData.tempId,
+                    temp: JSON.stringify(this.nReportForm),
+                    author: sessionStorage.getItem('user'),
+                    saveTime: new moment().format('YYYY-MM-DD HH:mm:ss'),
+                    title: this.tempTitle,
+                    range: this.range,
+                    department: sessionStorage.getItem('department')
+                }
+                this.$axios.post('/updateTemp', updateObj).then((response) => {
+                    console.log('保存到草稿箱之后的执行结果', response);
+                    this.$router.push(`/draft?type=templates`);
+                    // this.$router.push
                     this.$emit('toggleSpin', false);
                 })
+            } else {
+                this.isShowTempTitle = true;
+                this.$emit('toggleSpin', false);
+            }
+        },
+        creatTempConfirm() {
+            var insertObj = {
+                temp: JSON.stringify(this.nReportForm),
+                author: sessionStorage.getItem('user'),
+                title: this.tempTitle,
+                range: this.range,
+                department: sessionStorage.getItem('department')
+            }
+            if(!this.isDraft) {
+                insertObj.submitTime = new moment().format('YYYY-MM-DD HH:mm:ss');
+            } else {
+                insertObj.saveTime = new moment().format('YYYY-MM-DD HH:mm:ss');
+            }
+            console.log('插入新数据', insertObj);
+            this.$axios.post('/insertTemp', insertObj).then((response) => {
+                console.log('保存并发布之后的执行结果', response);
+                this.isShowTempTitle = false;
+                // 更新缓存
+                if(!this.isDraft) {
+                    var depart = sessionStorage.getItem('department');
+                    this.$axios.post(`/getTemp`, {depart: depart}).then((res) => {
+                        console.log('查询该部门的报告类型对应模板', res);
+                        if(sessionStorage.getItem(this.range)) {
+                            sessionStorage.removeItem(this.range);
+                        }
+                        sessionStorage.setItem(this.range, res.data[0][this.range]);
+                    }).then(() => {
+                        this.$router.push(`/home`);
+                        this.$emit('toggleSpin', false);
+                    })
+                } else {
+                    this.$emit('toggleSpin', false);
+                }
             })
-		},
+        },
+        deleteATemp() {
+            // this.$emit('deleteATemp', this.formatElseData.tempId);
+            
+            this.$axios.post('/deleteATemp', {id: this.formatElseData.tempId}).then((res) => {
+                console.log('deleteATemp', res.data);
+                // 重新请求数据，因为不是
+                // this.$emit('getAllTempData');
+                this.$router.push('/draft?type=templates');
+                this.$emit('toggleSpin', false);
+            })
+        },
+        goBack() {
+            this.$router.push('/home');
+        },
+        // change(val) {
+        //     console.log('val', val, this.tempTitle);
+        // }
     }
 }
 </script>

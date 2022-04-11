@@ -4,7 +4,7 @@
 		<div class="home-content">
 			<aside class="home-aside">
 				<a-card hoverable :bordered="false" style="width: 170px; border-radius: 10px" :bodyStyle="newStyle" @click="newReport">
-					<p>新增报告</p>
+					<p>新建</p>
 				</a-card>
 				<a-card v-if="isBoss" hoverable :bordered="false" style="width: 170px; border-radius: 10px" :bodyStyle="newStyle" @click="checkTemplate()">
 					<p>查看模板</p>
@@ -42,12 +42,24 @@
 				<div class="home-pagination"><a-pagination :current="curPage" :total="totalNum" size="small" @change="onPageChange" /></div>
 				</a-spin>
 			</main>
+			<a-modal v-model="isShowNewModel" dialogClass="choose-report-model" :getContainer="reportModelContainer" :footer="null" :bodyStyle="reportModelBodyStyle">
+				<div class="model-cards-box">
+					<a-card hoverable @click="toShowCreateReport('reports')">报告</a-card>
+					<a-card hoverable @click="toShowCreateTemp('templates')">模板</a-card>
+				</div>
+			</a-modal>
 			<a-modal v-model="isShowReportModel" dialogClass="choose-report-model" :getContainer="reportModelContainer" :footer="null" :bodyStyle="reportModelBodyStyle">
 				<div class="model-cards-box">
-					<a-card v-if="toPageType=='template'||range.weekly" hoverable ref="weekly" @click="toCreatReport('weekly')">周报</a-card>
-					<a-card v-if="toPageType=='template'||range.monthly" hoverable ref="monthly" @click="toCreatReport('monthly')">月报</a-card>
-					<a-card v-if="toPageType=='template'||range.seasonal" hoverable ref="seasonal" @click="toCreatReport('seasonal')">季报</a-card>
-					<a-card v-if="toPageType=='template'||range.yearly" hoverable ref="yearly" @click="toCreatReport('yearly')">年报</a-card>
+					<a-card v-if="(isShowNewModel && toPageType === 'template') || range.weekly" hoverable ref="weekly" @click="toCreatReport('weekly')">周报</a-card>
+					<a-card v-if="(isShowNewModel && toPageType === 'template') || range.monthly" hoverable ref="monthly" @click="toCreatReport('monthly')">月报</a-card>
+					<a-card v-if="(isShowNewModel && toPageType === 'template') || range.seasonal" hoverable ref="seasonal" @click="toCreatReport('seasonal')">季报</a-card>
+					<a-card v-if="(isShowNewModel && toPageType === 'template') || range.yearly" hoverable ref="yearly" @click="toCreatReport('yearly')">年报</a-card>
+				</div>
+			</a-modal>
+			<a-modal v-model="isShowTemplateModel" dialogClass="choose-report-model" :getContainer="reportModelContainer" :footer="null" :bodyStyle="reportModelBodyStyle">
+				<div class="model-cards-box">
+					<a-card hoverable @click="toEditTemp('reports')">报告</a-card>
+					<a-card hoverable @click="toEditTemp('templates')">模板</a-card>
 				</div>
 			</a-modal>
 		</div>
@@ -89,7 +101,9 @@ export default {
 			mainData: [],
 			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
 			user: sessionStorage.getItem('user'),
+			isShowNewModel: false,
 			isShowReportModel: false,
+			isShowTemplateModel: false,
 			toPageType: 'new',
 			// 从这里开始是条件筛选
 			screenName: '',
@@ -192,21 +206,66 @@ export default {
 		},
 		newReport() {
 			if(this.department !== 'null') {
-				this.toPageType = 'new';
-				this.isShowReportModel = true;
+				// this.toPageType = 'new';
+				// this.isShowReportModel = true;
+				if(this.isBoss) {
+					this.isShowNewModel = true;
+				} else {
+					// this.isShowReportModel = true;
+					if(Object.entries(this.range).length > 0) {
+						this.isShowReportModel = true;
+					} else {
+						this.$message.info('等待管理员添加报告模板');
+					}
+				}
 			} else {
 				this.$message.info('请先加入部门');
 			}
 		},
+		toShowCreateReport() {
+			if(Object.entries(this.range).length > 0) {
+				this.isShowReportModel = true;
+			} else {
+				if(this.isBoss) {
+					this.$message.info('请先添加模板');
+				} else {
+					this.$message.info('等待管理员添加报告模板');
+				}
+			}
+			this.toPageType = 'new';
+		},
+		toShowCreateTemp() {
+			this.isShowReportModel = true;
+			this.toPageType = 'template';
+		},
 		toCreatReport(range) {
-			this.$router.push(`/report?type=${this.toPageType}&range=${range}`);
+			this.$router.push(`/report?type=${this.toPageType}&range=${range}${!this.isShowNewModel || this.toPageType === 'new' ? "&temp=" + sessionStorage.getItem(range) + "" : "#1"}`);
 		},
 		checkTemplate() {
-			this.toPageType = 'template';
-			this.isShowReportModel = true;
+			console.log('Object.entries(this.range).length', Object.entries(this.range).length);
+			if(Object.entries(this.range).length > 0) {
+				this.toPageType = 'template';
+				this.isShowReportModel = true;
+			} else {
+				if(this.isBoss) {
+					this.$message.info('请先添加模板');
+				} else {
+					this.$message.info('等待管理员添加报告模板');
+				}
+			}
 		},
 		openDrafts() {
-			this.$router.push('/draft');
+			// this.$router.push('/draft');
+			this.toPageType = 'draft';
+			if(this.isBoss) {
+				this.isShowTemplateModel = true;
+			} else {
+				this.toEditTemp('reports');
+			}
+		},
+		// 进入草稿箱
+		toEditTemp(type) {
+			this.$router.push(`/draft?type=${type}`);
 		},
 		onPageChange(page) {
 			// console.log('改变页码', page, pageSize);

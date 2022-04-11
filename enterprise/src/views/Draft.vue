@@ -4,8 +4,13 @@
 		<div class="draft-content">
 			<a-button type="dashed" size="small" class="go-back" @click="goBack">返回</a-button>
 			<a-spin :spinning="isSearchSpinShow">
-				<main>
+				<main v-if="path.type==='reports'">
 					<FormatShort :mainData="mainData" @getDraftData="getDraftData" @toggleSpin="toggleSpin"></FormatShort>
+					<!-- 点击加载更多 -->
+					<div class="home-pagination"><a-pagination :current="curPage" :total="totalNum" size="small" @change="onPageChange" /></div>
+				</main>
+				<main v-if="path.type==='templates'">
+					<TempShort :mainData="mainData" @getAllTempData="getAllTempData" @toggleSpin="toggleSpin"></TempShort>
 					<!-- 点击加载更多 -->
 					<div class="home-pagination"><a-pagination :current="curPage" :total="totalNum" size="small" @change="onPageChange" /></div>
 				</main>
@@ -18,14 +23,21 @@
 import Header from '../components/Header.vue'
 // import mainData from '../assets/data.json'
 import FormatShort from '../components/FormatShort.vue'
+import TempShort from '../components/TempShort.vue'
 export default {
 	name: 'Draft',
 	components: {
         Header,
 		FormatShort,
+		TempShort
 	},
 	data() {
+		var path = {};
+		location.search.slice(1, location.search.length).split('&').forEach((item) => {
+			path[item.split('=')[0]] = item.split('=')[1];
+		})
 		return {
+			path,
 			mainData: [],
 			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
 			authorName: sessionStorage.getItem('user'),
@@ -35,7 +47,12 @@ export default {
 		}
 	},
 	mounted() {
-		this.getDraftData();
+		console.log('path', this.path);
+		if(this.path.type === 'reports') {
+			this.getDraftData();
+		} else {
+			this.getAllTempData();
+		}
 	},
 	methods: {
 		getDraftData(page) {
@@ -51,15 +68,33 @@ export default {
 				this.isSearchSpinShow = false;
 			})
 		},
+		getAllTempData(page) {
+			this.isSearchSpinShow = true;
+			var searchObj = {
+				authorName: this.authorName,
+				page: page || 1
+			}
+			this.$axios.post('/getAllTempData', searchObj).then((res) => {
+				console.log('searchres', res.data);
+				this.mainData = res.data.data;
+				this.totalNum = res.data.total;
+				this.isSearchSpinShow = false;
+			})
+		},
 		toggleSpin(state) {
 			this.isSearchSpinShow = state;
 		},
 		onPageChange(page) {
 			this.curPage = page;
-			this.getDraftData(page);
+			if(this.path.type === 'reports') {
+				this.getDraftData(page);
+			} else {
+				this.getAllTempData(page);
+			}
 		},
 		goBack() {
 			this.$router.push('/home');
+			// history.back()
 		}
 	}
 }
