@@ -35,7 +35,7 @@
             </a-form-model>
             
             <div class="btn-group" v-if="path.hash == 1">
-                <a-button ref="changeSize" @click="changeSize">字体大小</a-button>
+                <!-- <a-button ref="changeSize" @click="changeSize">大小</a-button> -->
                 <a-button ref="singleLine" @click="newFormItemPopup('singleLine')">单行输入框</a-button>
                 <a-button ref="multiLine" @click="newFormItemPopup('multiLine')">多行输入框</a-button>
                 <a-button ref="dropBox" @click="newFormItemPopup('dropBox')">下拉框</a-button>

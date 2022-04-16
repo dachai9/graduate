@@ -136,7 +136,7 @@ export default {
         },
         // 新增页面的修改数据类型
         changeDataFormat() {
-            this.$emit('toggleSpin', true);
+            // this.$emit('toggleSpin', true);
             // 传入数据
             // 如果是草稿箱修改，则修改数据，而不是新增
             if(this.type.type === 'draft') {
@@ -164,32 +164,71 @@ export default {
             }
             this.insertReportData.content = JSON.stringify(changedData);
             // console.log('this.insertReportData', JSON.stringify(changedData));
-            // 提交数据
-            this.$axios.post('/updateReportData', this.insertReportData).then(() => {
-                // console.log('res', res.data[0].id);
-                // 跳转到详情
-                this.$router.push('/draft?type=reports');
-                // if(this.type.type === 'draft') {
-                // } else {
-                //     this.$router.push(`/report?type=detail&range=${this.insertReportData.range}&id=${res.data[0].id}&temp=${this.insertReportData.tempId}`);
-                //     this.$router.go(0);
-                // }
-                this.$emit('toggleSpin', false);
-            })
+        },
+        checkFormRequire() {
+            this.changeDataFormat();
+            // console.log('this.allFormData', this.dynamicForm, this.allFormData);
+            if(this.insertReportData.title.length == 0) {
+                return false;
+            }
+            for(let i=0; i<this.dynamicForm.length; i++ ){
+                if(this.dynamicForm[i].require) {
+                    console.log('报告内容', this.dynamicForm[i].name + i, this.allFormData[this.dynamicForm[i].name + i]);
+                    // console.log('length', this.allFormData[this.dynamicForm[i].name + i].length);
+                    if(typeof this.allFormData[this.dynamicForm[i].name + i] != 'undefined') {
+                        if(this.dynamicForm[i].name === 'datePickerBox' && typeof this.allFormData[this.dynamicForm[i].name + i] === 'object') {
+                            return false;
+                        }
+                        if(this.allFormData[this.dynamicForm[i].name + i].length == 0) {
+                            return false;
+                        }
+                        continue;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return true;
         },
         saveToDraft() {
-            this.insertReportData.submitTime = '';
-            this.insertReportData.saveTime = new moment().format('YYYY-MM-DD HH:mm:ss');
-            this.changeDataFormat();
-            // 保存 saveTime
-            console.log('点击保存进草稿箱', this.insertReportData);
+            if(this.checkFormRequire()) {
+                this.insertReportData.submitTime = '';
+                this.insertReportData.saveTime = new moment().format('YYYY-MM-DD HH:mm:ss');
+                this.changeDataFormat();
+                // 保存 saveTime// 提交数据
+                this.$axios.post('/updateReportData', this.insertReportData).then(() => {
+                    // console.log('res', res.data[0].id);
+                    // 跳转到详情
+                    this.$router.push('/draft?type=reports');
+                    // if(this.type.type === 'draft') {
+                    // } else {
+                    //     this.$router.push(`/report?type=detail&range=${this.insertReportData.range}&id=${res.data[0].id}&temp=${this.insertReportData.tempId}`);
+                    //     this.$router.go(0);
+                    // }
+                    this.$emit('toggleSpin', false);
+                })
+                console.log('点击保存进草稿箱', this.insertReportData);
+            } else {
+                this.$message.info('请填写完整！');
+            }
         },
         saveToSubmit() {
-            this.insertReportData.saveTime = '';
-            this.insertReportData.submitTime = new moment().format('YYYY-MM-DD HH:mm:ss');
-            this.changeDataFormat();
-            // 保存提交时间
-            console.log('点击提交', this.insertReportData);
+            if(this.checkFormRequire()) {
+                // this.checkFormRequire();
+                this.insertReportData.saveTime = '';
+                this.insertReportData.submitTime = new moment().format('YYYY-MM-DD HH:mm:ss');
+                this.changeDataFormat();
+                // 保存提交时间// 提交数据
+                this.$axios.post('/updateReportData', this.insertReportData).then(() => {
+                    // console.log('res', res.data[0].id);
+                    // 跳转到详情
+                    this.$router.push('/draft?type=reports');
+                    this.$emit('toggleSpin', false);
+                })
+                console.log('点击提交', this.insertReportData); 
+            } else {
+                this.$message.info('请填写完整！');
+            }
         },
         deleteReport() {
             // console.log('确定');
