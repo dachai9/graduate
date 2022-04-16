@@ -37,12 +37,12 @@ export default {
 			this.$emit('toggleSpin', true);
 			this.$axios.post('/searchStaff', {staffName: val || ''}).then((res) => {
 				console.log('res', res.data);
-				var arr = [];
-				res.data.forEach(item => {
-					arr.push(item.staffName)
-				})
+				// var arr = [];
+				// res.data.forEach(item => {
+				// 	arr.push(item.staffName)
+				// })
 				// arr.push()
-				this.staffArr = arr;
+				// this.staffArr = arr;
 				this.staffData = res.data;
 				this.$emit('getSearchData', this.staffData);
 				this.$emit('toggleSpin', false);

@@ -295,6 +295,7 @@ export default {
             }
         },
         creatTempConfirm() {
+            this.$emit('toggleSpin', true);
             var insertObj = {
                 temp: JSON.stringify(this.nReportForm),
                 author: sessionStorage.getItem('user'),
@@ -327,6 +328,8 @@ export default {
                 } else {
                     this.$emit('toggleSpin', false);
                 }
+                this.$router.push('/draft?type=templates');
+                this.$emit('toggleSpin', false);
             })
         },
         deleteATemp() {

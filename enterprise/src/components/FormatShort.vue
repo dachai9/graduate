@@ -70,7 +70,7 @@ export default {
             this.$axios.post('/deleteAReport', {id: id}).then(() => {
                 // console.log('res', res.data);
                 // 重新请求数据，因为不是
-                this.$emit('getSumDraftData');
+                this.$emit('getDraftData');
                 this.$emit('toggleSpin', false);
             })
         }

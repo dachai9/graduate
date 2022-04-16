@@ -50,8 +50,12 @@ export default {
                     // console.log('验证成功', valid);
                     // 添加数据库判断
                     this.$axios.post('/login', this.form).then((response) => {
-                        // console.log('response', response.data);
+                        console.log('response', response);
                         if(response.data.length) {
+                            // 保存 uid
+                            sessionStorage.setItem('uid', response.data[0].uid)
+                            this.$store.state.uid = response.data[0].uid
+                            // 保存其他信息
                             sessionStorage.setItem('user', response.data[0].staffName)
                             sessionStorage.setItem('isBoss', response.data[0].isBoss)
                             sessionStorage.setItem('department', response.data[0].department)

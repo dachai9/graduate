@@ -165,15 +165,15 @@ export default {
             this.insertReportData.content = JSON.stringify(changedData);
             // console.log('this.insertReportData', JSON.stringify(changedData));
             // 提交数据
-            this.$axios.post('/updateReportData', this.insertReportData).then((res) => {
+            this.$axios.post('/updateReportData', this.insertReportData).then(() => {
                 // console.log('res', res.data[0].id);
                 // 跳转到详情
-                if(this.type.type === 'draft') {
-                    this.$router.push('/draft');
-                } else {
-                    this.$router.push(`/report?type=detail&range=${this.insertReportData.range}&id=${res.data[0].id}`);
-                    this.$router.go(0);
-                }
+                this.$router.push('/draft?type=reports');
+                // if(this.type.type === 'draft') {
+                // } else {
+                //     this.$router.push(`/report?type=detail&range=${this.insertReportData.range}&id=${res.data[0].id}&temp=${this.insertReportData.tempId}`);
+                //     this.$router.go(0);
+                // }
                 this.$emit('toggleSpin', false);
             })
         },
