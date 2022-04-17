@@ -35,7 +35,10 @@
 						<a-button v-if="range.yearly" ref="yearly" :type="isScreened.yearly ? 'primary' : 'default'" @click="screenReport('yearly')">年报</a-button>
 					</div>
 				</div>
-				<div v-if="isBoss" class="all-read" @click="setAllRead">全部标记为已读</div>
+				<div class="action-box" v-if="isBoss">
+					<div class="all-read" @click="setAllRead">全部标记为已读</div>
+					<div class="submit-list" @click="checkSubmitList">查看提交名单</div>
+				</div>
 				<a-spin :spinning="isSearchSpinShow">
 					<FormatShort :mainData="mainData" :isRead="isRead" @readReport="readReport"></FormatShort>
 					<!-- 点击加载更多 -->
@@ -60,6 +63,28 @@
 				<div class="model-cards-box">
 					<a-card hoverable @click="toEditTemp('reports')">报告</a-card>
 					<a-card hoverable @click="toEditTemp('templates')">模板</a-card>
+				</div>
+			</a-modal>
+			<a-modal v-model="isShowSubmitList" dialogClass="choose-report-model" :getContainer="reportModelContainer" :footer="null" :bodyStyle="listModelBodyStyle">
+				<div class="submit-list-box">
+					<a-tabs type="card" size="small">
+						<a-tab-pane key="1" tab="已提交名单">
+							<a-card v-for="(item, index) of submitedList" :key="index">
+								<span :title="item">{{item}}</span>
+							</a-card>
+							<a-card v-if="!submitedList.length" class="nodata">
+								暂无
+							</a-card>
+						</a-tab-pane>
+						<a-tab-pane key="2" tab="未提交名单">
+							<a-card v-for="(item, index) of unSubmitList" :key="index">
+								<span :title="item">{{item}}</span>
+							</a-card>
+							<a-card v-if="!unSubmitList.length" class="nodata">
+								暂无
+							</a-card>
+						</a-tab-pane>
+					</a-tabs>
 				</div>
 			</a-modal>
 		</div>
@@ -96,7 +121,11 @@ export default {
 				"border-radius": "10px"
 			},
 			reportModelBodyStyle: {
-				"padding" : "60px 24px"
+				"padding": "60px 24px"
+			},
+			listModelBodyStyle: {
+				"padding": "20px 24px",
+				// "font-size": "12px"
 			},
 			mainData: [],
 			isBoss: sessionStorage.getItem('isBoss') == '1' ? true : false,
@@ -104,6 +133,7 @@ export default {
 			isShowNewModel: false,
 			isShowReportModel: false,
 			isShowTemplateModel: false,
+			isShowSubmitList: false,
 			toPageType: 'new',
 			// 从这里开始是条件筛选
 			screenName: '',
@@ -121,7 +151,9 @@ export default {
 			// 到这里结束
 			isSearchSpinShow: false,
 			curPage: 1,
-			totalNum: 50
+			totalNum: 50,
+			submitedList: [],
+			unSubmitList: [],
 		}
 	},
 	mounted() {
@@ -155,9 +187,10 @@ export default {
 			// 	console.log('获取到的报告总数', res.data);
 			// 	this.totalNum = res.data[0].total;
 			// })
+			// console.log('searchObj', searchObj);
 			// 获取具体数据
 			this.$axios.post('/getSomeReportData', searchObj).then((res) => {
-				console.log('res', res.data);
+				// console.log('res', res.data);
 				this.mainData = res.data.data;
 				this.totalNum = res.data.total;
 				this.isSearchSpinShow = false;
@@ -185,11 +218,17 @@ export default {
 		onhomeSearch() {
 			this.isScreenedArr = [];
 			for(const [key, value] of Object.entries(this.isScreened)) {
-				if(value) {
+				if(value && this.range[key]) {
 					this.isScreenedArr.push(key);
 				}
 			}
-			this.loadReportData({dateString: this.dateString, screenName: this.screenName, isScreenedArr: this.isScreenedArr, page: this.curPage});
+			var searchObj = {
+				dateString: this.dateString, 
+				screenName: this.screenName, 
+				isScreenedArr: JSON.stringify(this.isScreenedArr), 
+				page: this.curPage
+			}
+			this.loadReportData(searchObj);
 			// console.log('点击搜索', this.dateString, this.screenName, this.isScreenedArr);
 		},
 		onhomeReset() {
@@ -298,6 +337,24 @@ export default {
                 console.log('res', res);
             })
 		},
+		checkSubmitList() {
+			// console.log('查看名单的报告类型', this.isScreenedArr);
+			if(this.isScreenedArr.length === 1) {
+				var searchObj = {
+					tempId: this.range[this.isScreenedArr[0]],
+					department: this.department
+				}
+				console.log('searchObj', searchObj);
+				this.$axios.post('/getSubmitList', searchObj).then((res) => {
+					console.log('res', res.data);
+					this.unSubmitList = JSON.parse(JSON.stringify(res.data.unSubmitList));
+					this.submitedList = JSON.parse(JSON.stringify(res.data.submitedList));
+				})
+				this.isShowSubmitList = true;
+			} else {
+				this.$message.info('请选择单个报告类型，点击搜索后，进行名单查看！');
+			}
+		},
 		// 导出全部
 		exportExcel(isAll) {
 			this.isSearchSpinShow = true;
@@ -380,6 +437,35 @@ export default {
 				margin: 0;
 			}
 		}
+		.submit-list-box {
+			width: 100%;
+			.ant-card {
+				width: 80px;
+				float: left;
+				margin-right: 10px;
+			}
+			.ant-card-body {
+				// width: 40px;
+				padding: 0;
+				// text-align: center;
+				// white-space: pre;
+				// text-overflow: ellipsis;
+				// overflow: hidden;
+				span {
+					width: 80px;
+					display: inline-block;
+					padding: 10px;
+					text-align: center;
+					white-space: pre;
+					text-overflow: ellipsis;
+					overflow: hidden;
+				}
+			}
+			.nodata {
+				width: 100%;
+				padding: 15px;
+			}
+		}
 		// .choose-report-model {
 			// width: 80%!important;
 		// }
@@ -387,13 +473,34 @@ export default {
 			display: none;
 		}
 	}
+	.action-box {
+		margin-top: -10px;
+	}
 	.all-read {
+		display: inline-block;
+		width: 100px;
 		color: #57a6ec;
 		font-size: 12px;
 		cursor: pointer;
 		margin: -8px 0 5px 0;
 		&:hover {
 			color: #87c3f7;
+		}
+	}
+	.submit-list {
+		display: inline-block;
+		width: 90px;
+		text-align: center;
+		border-radius: 5px;
+		color: #fff;
+		background-color: #57a6ec;
+		font-size: 12px;
+		cursor: pointer;
+		margin: -8px 0 5px 0;
+		&:hover {
+			// background-color: #87c3f7;
+			// color: #eee;
+			opacity: .9;
 		}
 	}
 }

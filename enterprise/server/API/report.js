@@ -4,33 +4,65 @@ let db = require('../db/index')
 let { verifyToken } = require("./util");
 
 // 插入报告数据
-router.post('/updateReportData', (req, res) => {
+router.post('/updateReportData', async (req, res) => {
     const { status, code, message } = verifyToken(req.headers);
     if (status) {
         // req.body.first_name
         // console.log('req', req);
+        // 如果是草稿箱，则 change = true
+        // console.log('req.body.change', req.body.change);
         if (req.body.change) {
             var sql = `update reports set title = '${req.body.title}', content = '${req.body.content}', rangeType = '${req.body.range}', saveTime = '${req.body.saveTime}', submitTime = '${req.body.submitTime}', author = '${req.body.author}', tempId = ${req.body.tempId}, shortCut = '${req.body.shortCut}' where reportId = '${req.body.id}'`;
         } else {
             var sql = `insert into reports (title, content, rangeType, ${req.body.saveTime === '' ? 'submitTime' : 'saveTime'}, author, tempId, shortCut) values ('${req.body.title}', '${req.body.content}', '${req.body.range}', '${req.body.saveTime === '' ? req.body.submitTime : req.body.saveTime}', '${req.body.author}', ${req.body.tempId}, '${req.body.shortCut}');`;
         }
-        var selectSql = `select max(reportId) as id from reports`;
+        // var selectSql = `select max(reportId) as id from reports`;
+        var getSubmitSql = `select submitList from templates where tempId = ${req.body.tempId}`;
         // console.log('sql', sql);
         // console.log('selectSql', selectSql);
+        var submitList = [];
+        // var returnData = [];
         db.query(sql, (err) => {
             if (err) {
                 return res.status(500).send({ err, status: 0, message: "更新报告失败，请重试！" });
             }
-            if (req.body.change) {
-                res.status(200).send({ id: req.body.id });
-            } else {
-                db.query(selectSql, (err, data) => {
-                    if (err) {
-                        return res.status(500).send({ err, status: 0, message: "更新报告失败，请重试！" });
-                    }
-                    res.status(200).send(data)
-                })
-            }
+            new Promise((resolve, reject) => {
+                if (req.body.submitTime) {
+                    db.query(getSubmitSql, (err, submitListData) => {
+                        if (err) {
+                            return res.status(500).send({ err, status: 0, message: "获取已提交列表失败，请重试！" });
+                        }
+                        // console.log('submitListData', submitListData);
+                        submitList = submitListData[0].submitList ? JSON.parse(submitListData[0].submitList) : [];
+
+                        // console.log('submitList', submitList);
+                        submitList.push(req.body.author);
+                        // console.log('submitList', submitList);
+                        var updateSubmitSql = `update templates set submitList = '${JSON.stringify(submitList)}' where tempId = ${req.body.tempId}`;
+                        // console.log('updateSubmitSql', updateSubmitSql);
+                        db.query(updateSubmitSql, (err, updatedData) => {
+                            if (err) {
+                                return res.status(500).send({ err, status: 0, message: "更新已提交列表失败，请重试！" });
+                            }
+                            // console.log('updated', updatedData);
+                            resolve()
+                        })
+                    })
+                }
+            }).then(() => {
+                if (req.body.change) {
+                    res.status(200).send({ id: req.body.id });
+                } else {
+                    db.query(selectSql, (err, data) => {
+                        if (err) {
+                            return res.status(500).send({ err, status: 0, message: "获取报告最新id失败，请重试！" });
+                        }
+                        res.status(200).send(data);
+                        // returnData = data;
+                    })
+                }
+                // res.status(200).send(returnData);
+            })
         })
     } else {
         return res.status(code).send({ status: 0, message });
@@ -83,9 +115,9 @@ router.post('/getSomeReportData', (req, res) => {
     const { status, code, message } = verifyToken(req.headers);
     if (status) {
         // req.body.first_name
-        // console.log('req', req);
+        // console.log('req', req.body);
         var body = req.body;
-        // var isScreenedStr = body.isScreenedArr.join(',');
+        body.isScreenedArr && (body.isScreenedArr = JSON.parse(body.isScreenedArr));
         var sql = '';
         var sumSql = '';
         if (body.user) {
@@ -257,6 +289,42 @@ router.post('/setAllRead', (req, res) => {
                     res.status(500).send({ err, status: 0, message: "更新已读列表失败，请重试！" });
                 }
                 res.status(200).send(JSON.stringify(dataArr))
+            })
+        })
+    } else {
+        return res.status(code).send({ status: 0, message });
+    }
+})
+
+// 获取已提交名单
+router.post('/getSubmitList', (req, res) => {
+    const { status, code, message } = verifyToken(req.headers);
+    if (status) {
+        var sql = `select * from allStaff where department = '${req.body.department}'`;
+        // console.log('setAllRead: sql', sql);
+        db.query(sql, (err, data) => {
+            if (err) {
+                res.status(500).send({ err, status: 0, message: "获取员工信息失败，请重试！" });
+            }
+            var dataArr = {};
+            var allStaff = [];
+            data.forEach(item => {
+                // console.log('item', item);
+                allStaff.push(item.staffName);
+            })
+            // console.log('allStaff', allStaff);
+
+            var submitListSql = `select * from templates where tempId = ${req.body.tempId}`;
+            db.query(submitListSql, (err, submitData) => {
+                if (err) {
+                    res.status(500).send({ err, status: 0, message: "获取模板信息提交名单失败，请重试！" });
+                }
+                console.log('submitData', submitData[0].submitList);
+                dataArr.submitedList = submitData[0].submitList ? JSON.parse(submitData[0].submitList) : [];
+                console.log('submitData.submitList', dataArr.submitedList);
+                dataArr.unSubmitList = allStaff.filter(item => !dataArr.submitedList.includes(item))
+                // console.log('dataArr', dataArr);
+                res.status(200).send(JSON.stringify(dataArr));
             })
         })
     } else {

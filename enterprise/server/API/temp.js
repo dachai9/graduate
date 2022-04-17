@@ -28,7 +28,7 @@ router.post('/insertTemp', (req, res) => {
     const { status, code, message } = verifyToken(req.headers);
     if (status) {
         // req.body.first_name
-        var sql = `insert into templates (temp, author, title${req.body.saveTime ? ", saveTime" : ""}${req.body.submitTime ? ", submitTime" : ""}) values ('${req.body.temp}', '${req.body.author}', '${req.body.title}'${req.body.saveTime ? ", '" + req.body.saveTime + "'" : ""}${req.body.submitTime ? ", '" + req.body.submitTime + "'" : ""})`;
+        var sql = `insert into templates (temp, author, title${req.body.saveTime ? ", saveTime" : ""}${req.body.submitTime ? ", submitTime" : ""}, updateTime) values ('${req.body.temp}', '${req.body.author}', '${req.body.title}'${req.body.saveTime ? ", '" + req.body.saveTime + "'" : ""}${req.body.submitTime ? ", '" + req.body.submitTime + "'" : ""}, '${req.body.updateTime}')`;
         if (req.body.submitTime) {
             var updateSql = `update enterprise.departments a, enterprise.templates b set a.${req.body.range} = (select max(tempId) from templates) where a.departName = '${req.body.department}';`
         }

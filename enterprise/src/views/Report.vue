@@ -34,7 +34,7 @@ export default {
 			path[item.split('=')[0]] = item.split('=')[1];
 		})
 		path.hash = location.hash ? location.hash.replace('#', '') : '';
-		console.log('path', path);
+		// console.log('path', path);
 		return {
 			path,
 			formatData: [],

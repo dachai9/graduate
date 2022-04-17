@@ -69,6 +69,133 @@
                     </div> -->
                 </div>
             </a-modal>
+
+            <a-modal v-model="isShowTempTime" title="提醒" @ok="tempTimeConfirm" cancelText="取消">
+                <div class="time-model">
+                    <a-form-model v-if="range === 'weekly'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
+                        <a-form-model-item label="更新时间" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <a-select :default-value="'monday'" style="width: 120px" v-model="updateTime.day" >
+                                <a-select-option value="monday">
+                                    星期一
+                                </a-select-option>
+                                <a-select-option value="tuesday">
+                                    星期二
+                                </a-select-option>
+                                <a-select-option value="wednesday">
+                                    星期三
+                                </a-select-option>
+                                <a-select-option value="thursday">
+                                    星期四
+                                </a-select-option>
+                                <a-select-option value="friday">
+                                    星期五
+                                </a-select-option>
+                                <a-select-option value="saturday">
+                                    星期六
+                                </a-select-option>
+                                <a-select-option value="sunday">
+                                    星期日
+                                </a-select-option>
+                            </a-select>
+                            <a-time-picker :locale="localeTime" v-model="updateTime.time" />
+                        </a-form-model-item>
+                    </a-form-model>
+                    <a-form-model v-if="range === 'monthly'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
+                        <a-form-model-item label="更新时间" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <a-select style="width: 120px" v-model="updateTime.monthDay" >
+                                <a-select-option v-for="n in 28" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-time-picker :locale="localeTime" v-model="updateTime.time" />
+                        </a-form-model-item>
+                    </a-form-model>
+                    <a-form-model v-if="range === 'seasonal'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
+                        更新时间：
+                        <a-form-model-item label="第一季度" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.first" :default-value="moment().format('')" /> -->
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.firstMonth" >
+                                <a-select-option v-for="n in 12" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.firstDay" >
+                                <a-select-option v-for="n in (updateTime.seasonDay.firstMonth ? moment(`2022-${updateTime.seasonDay.firstMonth}`).daysInMonth() : 28)" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.firstTime" />
+                        </a-form-model-item>
+                        <a-form-model-item label="第二季度" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.second" :default-value="moment()" /> -->
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.secondMonth" >
+                                <a-select-option v-for="n in 12" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.secondDay" >
+                                <a-select-option v-for="n in (updateTime.seasonDay.secondMonth ? moment(`2022-${updateTime.seasonDay.secondMonth}`).daysInMonth() : 28)" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.secondTime" />
+                        </a-form-model-item>
+                        <a-form-model-item label="第三季度" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.third" :default-value="moment()" /> -->
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.thirdMonth" >
+                                <a-select-option v-for="n in 12" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.thirdDay" >
+                                <a-select-option v-for="n in (updateTime.seasonDay.thirdMonth ? moment(`2022-${updateTime.seasonDay.thirdMonth}`).daysInMonth() : 28)" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.thirdTime" />
+                        </a-form-model-item>
+                        <a-form-model-item label="第四季度" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.fourth" :default-value="moment()" /> -->
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.fourthMonth" >
+                                <a-select-option v-for="n in 12" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-select style="width: 70px" v-model="updateTime.seasonDay.fourthDay" >
+                                <a-select-option v-for="n in (updateTime.seasonDay.fourthMonth ? moment(`2022-${updateTime.seasonDay.fourthMonth}`).daysInMonth() : 28)" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.fourthTime" />
+                        </a-form-model-item>
+                    </a-form-model>
+                    <a-form-model v-if="range === 'yearly'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
+                        <a-form-model-item label="更新时间" required>
+                            <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
+                            <!-- <a-date-picker v-model="updateTime.yearDay" :default-value="moment()" /> -->
+                            <a-select style="width: 70px" v-model="updateTime.yearDay.mouth" >
+                                <a-select-option v-for="n in 12" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-select style="width: 70px" v-model="updateTime.yearDay.day" >
+                                <a-select-option v-for="n in (updateTime.yearDay.mouth ? moment(`2022-${updateTime.yearDay.mouth}`).daysInMonth() : 28)" :key="n" :value="n">
+                                    {{n > 9 ? n : '0' + n}}
+                                </a-select-option>
+                            </a-select>
+                            <a-time-picker :locale="localeTime" v-model="updateTime.time" />
+                        </a-form-model-item>
+                    </a-form-model>
+                    <div class="tips">* 更新时间：指系统中提交名单的重置时间，当该时间到达，提交名单将置为空</div>
+                </div>
+            </a-modal>
+
             <a-modal v-model="isShowTempTitle" title="提示" @ok="creatTempConfirm" cancelText="取消">
                 <div>
                     <a-form-model :label-col="{span: 4}" :wrapper-col="{span: 14}">
@@ -93,6 +220,7 @@
 
 <script>
 import locale from 'ant-design-vue/es/date-picker/locale/zh_CN';
+import localeTime from 'ant-design-vue/es/time-picker/locale/zh_CN';
 import moment from 'moment'
 export default {
 	name: 'tempform',
@@ -109,10 +237,12 @@ export default {
 			path[item.split('=')[0]] = item.split('=')[1];
 		})
 		path.hash = location.hash ? location.hash.replace('#', '') : '';
-		console.log('path', path);
+		// console.log('path', path);
         // let range = this.formatElseData.range;
         return {
+            moment,
             locale,
+            localeTime,
             path,
             labelCol: { span: 5 },
             wrapperCol: { span: 14 },
@@ -146,7 +276,16 @@ export default {
             },
             isShowTempTitle: false,
             isDraft: false,
-            tempTitle: this.title
+            tempTitle: this.title,
+            isShowTempTime: false,
+            updateTime: {
+                day: '',
+                monthDay: '',
+                seasonDay: {},
+                yearDay: {}
+                // time: '00:00:00'
+            },
+            updateData: ''
         }
     },
     watch: {
@@ -233,8 +372,8 @@ export default {
                 }
             })
 			console.log('处理数据后', this.dynamicForm, JSON.stringify(this.nReportForm));
-            console.log('this.tempTitle', this.tempTitle);
-            console.log('this.title', this.title);
+            // console.log('this.tempTitle', this.tempTitle);
+            // console.log('this.title', this.title);
         },
 		saveTemplateToSubmit() {
             this.isDraft = false;
@@ -264,7 +403,14 @@ export default {
                     })
                 })
             } else {
-                this.isShowTempTitle = true;
+                // this.isShowTempTitle = true;
+                this.isShowTempTime = true;
+                this.updateTime = JSON.parse(JSON.stringify({
+                    day: '',
+                    monthDay: '',
+                    seasonDay: {},
+                    yearDay: {}
+                }))
                 this.$emit('toggleSpin', false);
             }
 		},
@@ -290,18 +436,75 @@ export default {
                     this.$emit('toggleSpin', false);
                 })
             } else {
-                this.isShowTempTitle = true;
+                // this.isShowTempTitle = true;
+                this.isShowTempTime = true;
+                this.updateTime = JSON.parse(JSON.stringify({
+                    day: '',
+                    monthDay: '',
+                    seasonDay: {},
+                    yearDay: {}
+                }))
                 this.$emit('toggleSpin', false);
             }
         },
+        tempTimeConfirm() {
+            // console.log('this.updateTime', this.updateTime);
+            try {
+                switch (this.range) {
+                    case 'weekly':
+                        if(!this.updateTime.day || !this.updateTime.time) {
+                            this.$message.info('请填写完整时间！')
+                            return false;
+                        }
+                        this.updateData = [{day: this.updateTime.day > 9 ? this.updateTime.day : '0' + this.updateTime.day, time: this.updateTime.time.format('HH:mm:ss')}];
+                        break;
+                    case 'monthly':
+                        if(!this.updateTime.monthDay || !this.updateTime.time) {
+                            this.$message.info('请填写完整时间！')
+                            return false;
+                        }
+                        this.updateData = [{day: this.updateTime.monthDay > 9 ? this.updateTime.monthDay : '0' + this.updateTime.monthDay, time: this.updateTime.time.format('HH:mm:ss')}];
+                        break;
+                    case 'seasonal':
+                        if(Object.entries(this.updateTime.seasonDay).length < 12) {
+                            // console.log('数据还没够');
+                            this.$message.info('请填写完整时间！')
+                            return false;
+                        }
+                        this.updateData = [
+                            {day: (this.updateTime.seasonDay.firstMonth > 9 ? this.updateTime.seasonDay.firstMonth : '0'+this.updateTime.seasonDay.firstMonth) + ':' + (this.updateTime.seasonDay.firstDay > 9 ? this.updateTime.seasonDay.firstDay : '0' + this.updateTime.seasonDay.firstDay), time: this.updateTime.seasonDay.firstTime.format('HH:mm:ss')}, 
+                            {day: (this.updateTime.seasonDay.secondMonth > 9 ? this.updateTime.seasonDay.secondMonth : '0'+this.updateTime.seasonDay.secondMonth) + ':' + (this.updateTime.seasonDay.secondDay > 9 ? this.updateTime.seasonDay.secondDay : '0' + this.updateTime.seasonDay.secondDay), time: this.updateTime.seasonDay.secondTime.format('HH:mm:ss')}, 
+                            {day: (this.updateTime.seasonDay.thirdMonth > 9 ? this.updateTime.seasonDay.thirdMonth : '0'+this.updateTime.seasonDay.thirdMonth) + ':' + (this.updateTime.seasonDay.thirdDay > 9 ? this.updateTime.seasonDay.thirdDay : '0' + this.updateTime.seasonDay.thirdDay), time: this.updateTime.seasonDay.thirdTime.format('HH:mm:ss')}, 
+                            {day: (this.updateTime.seasonDay.fourthMonth > 9 ? this.updateTime.seasonDay.fourthMonth : '0'+this.updateTime.seasonDay.fourthMonth) + ':' + (this.updateTime.seasonDay.fourthDay > 9 ? this.updateTime.seasonDay.fourthDay : '0' + this.updateTime.seasonDay.fourthDay), time: this.updateTime.seasonDay.fourthTime.format('HH:mm:ss')}];
+                        break;
+                    case 'yearly':
+                        if(!this.updateTime.yearDay.mouth || !this.updateTime.yearDay.day || !this.updateTime.time) {
+                            this.$message.info('请填写完整时间！')
+                            return false;
+                        }
+                        this.updateData = [{day: (this.updateTime.yearDay.mouth > 9 ? this.updateTime.yearDay.mouth : '0' + this.updateTime.yearDay.mouth) + ':' + (this.updateTime.yearDay.day > 9 ? this.updateTime.yearDay.day : '0' + this.updateTime.yearDay.day), time: this.updateTime.time.format('HH:mm:ss')}];
+                        break;
+                    default:
+                        this.updateData = [];
+                        break;
+                }
+            } catch (error) {
+                // console.log('error', error);
+                this.$message.info('请填写完整时间！')
+                return false;
+            }
+            console.log('this.updateData', this.updateData);
+            this.isShowTempTime = false;
+            this.isShowTempTitle = true;
+        },
         creatTempConfirm() {
-            this.$emit('toggleSpin', true);
             var insertObj = {
                 temp: JSON.stringify(this.nReportForm),
                 author: sessionStorage.getItem('user'),
                 title: this.tempTitle,
                 range: this.range,
-                department: sessionStorage.getItem('department')
+                department: sessionStorage.getItem('department'),
+                updateTime: JSON.stringify(this.updateData),
             }
             if(!this.isDraft) {
                 insertObj.submitTime = new moment().format('YYYY-MM-DD HH:mm:ss');
@@ -309,28 +512,33 @@ export default {
                 insertObj.saveTime = new moment().format('YYYY-MM-DD HH:mm:ss');
             }
             console.log('插入新数据', insertObj);
-            this.$axios.post('/insertTemp', insertObj).then((response) => {
-                console.log('保存并发布之后的执行结果', response);
-                this.isShowTempTitle = false;
-                // 更新缓存
-                if(!this.isDraft) {
-                    var depart = sessionStorage.getItem('department');
-                    this.$axios.post(`/getTemp`, {depart: depart}).then((res) => {
-                        console.log('查询该部门的报告类型对应模板', res);
-                        if(sessionStorage.getItem(this.range)) {
-                            sessionStorage.removeItem(this.range);
-                        }
-                        sessionStorage.setItem(this.range, res.data[0][this.range]);
-                    }).then(() => {
-                        this.$router.push(`/home`);
+            if(this.tempTitle) {
+                this.$emit('toggleSpin', true);
+                this.$axios.post('/insertTemp', insertObj).then((response) => {
+                    console.log('保存并发布之后的执行结果', response);
+                    this.isShowTempTitle = false;
+                    // 更新缓存
+                    if(!this.isDraft) {
+                        var depart = sessionStorage.getItem('department');
+                        this.$axios.post(`/getTemp`, {depart: depart}).then((res) => {
+                            console.log('查询该部门的报告类型对应模板', res);
+                            if(sessionStorage.getItem(this.range)) {
+                                sessionStorage.removeItem(this.range);
+                            }
+                            sessionStorage.setItem(this.range, res.data[0][this.range]);
+                        }).then(() => {
+                            this.$router.push(`/home`);
+                            this.$emit('toggleSpin', false);
+                        })
+                    } else {
                         this.$emit('toggleSpin', false);
-                    })
-                } else {
+                    }
+                    this.$router.push('/draft?type=templates');
                     this.$emit('toggleSpin', false);
-                }
-                this.$router.push('/draft?type=templates');
-                this.$emit('toggleSpin', false);
-            })
+                })
+            } else {
+                this.$message.info('请先输入模板标题！');
+            }
         },
         deleteATemp() {
             // this.$emit('deleteATemp', this.formatElseData.tempId);
@@ -379,5 +587,17 @@ export default {
     footer {
         text-align: center;
     }
+}
+.tips {
+    color: #d72b2b;
+    font-size: 12px;
+}
+.time-model {
+    /deep/.ant-form-item {
+        margin-bottom: 10px;
+    }
+    /deep/::-webkit-scrollbar {
+		display: none;
+	}
 }
 </style>

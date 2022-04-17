@@ -32,11 +32,11 @@ export default {
 	},
     methods: {
 		mStaffGetName(val) {
-			console.log('查询员工', val);
+			// console.log('查询员工', val);
 			// this.staffArr = !val ? [] : [val + 'a', val + 'b'];
 			this.$emit('toggleSpin', true);
 			this.$axios.post('/searchStaff', {staffName: val || ''}).then((res) => {
-				console.log('res', res.data);
+				// console.log('res', res.data);
 				// var arr = [];
 				// res.data.forEach(item => {
 				// 	arr.push(item.staffName)
