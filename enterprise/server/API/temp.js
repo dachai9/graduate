@@ -72,7 +72,7 @@ router.get('/getTempById', (req, res) => {
     }
 })
 
-// 获取所有的模板信息
+// 获取草稿箱中所有的模板信息
 router.post('/getAllTempData', (req, res) => {
     const { status, code, message } = verifyToken(req.headers);
     if (status) {
@@ -132,6 +132,7 @@ router.post('/updateTemp', (req, res) => {
         // })
         if (req.body.submitTime) {
             var updateSql = `update enterprise.departments a, enterprise.templates b set a.${req.body.range} = '${req.body.tempId}' where a.departName = '${req.body.department}';`
+
         }
         // console.log('sql', sql);
         // console.log('updateSql', updateSql);

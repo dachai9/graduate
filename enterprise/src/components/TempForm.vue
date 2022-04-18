@@ -75,41 +75,43 @@
                     <a-form-model v-if="range === 'weekly'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
                         <a-form-model-item label="更新时间" required>
                             <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
-                            <a-select :default-value="'monday'" style="width: 120px" v-model="updateTime.day" >
-                                <a-select-option value="monday">
+                            <!-- <a-select :default-value="'Monday'" style="width: 120px" v-model="updateTime.day" > -->
+                            <a-select :default-value="'Monday'" v-model="updateTime.day" >
+                                <a-select-option value="Monday">
                                     星期一
                                 </a-select-option>
-                                <a-select-option value="tuesday">
+                                <a-select-option value="Tuesday">
                                     星期二
                                 </a-select-option>
-                                <a-select-option value="wednesday">
+                                <a-select-option value="Wednesday">
                                     星期三
                                 </a-select-option>
-                                <a-select-option value="thursday">
+                                <a-select-option value="Thursday">
                                     星期四
                                 </a-select-option>
-                                <a-select-option value="friday">
+                                <a-select-option value="Friday">
                                     星期五
                                 </a-select-option>
-                                <a-select-option value="saturday">
+                                <a-select-option value="Saturday">
                                     星期六
                                 </a-select-option>
-                                <a-select-option value="sunday">
+                                <a-select-option value="Sunday">
                                     星期日
                                 </a-select-option>
                             </a-select>
-                            <a-time-picker :locale="localeTime" v-model="updateTime.time" />
+                            <!-- <a-time-picker :locale="localeTime" v-model="updateTime.time" /> -->
                         </a-form-model-item>
                     </a-form-model>
                     <a-form-model v-if="range === 'monthly'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
                         <a-form-model-item label="更新时间" required>
                             <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
-                            <a-select style="width: 120px" v-model="updateTime.monthDay" >
+                            <!-- <a-select style="width: 120px" v-model="updateTime.monthDay" > -->
+                            <a-select v-model="updateTime.monthDay" >
                                 <a-select-option v-for="n in 28" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-time-picker :locale="localeTime" v-model="updateTime.time" />
+                            </a-select> 日
+                            <!-- <a-time-picker :locale="localeTime" v-model="updateTime.time" /> -->
                         </a-form-model-item>
                     </a-form-model>
                     <a-form-model v-if="range === 'seasonal'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
@@ -117,82 +119,82 @@
                         <a-form-model-item label="第一季度" required>
                             <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
                             <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.first" :default-value="moment().format('')" /> -->
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.firstMonth" >
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.firstMonth" >
                                 <a-select-option v-for="n in 12" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.firstDay" >
+                            </a-select> 月 
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.firstDay" >
                                 <a-select-option v-for="n in (updateTime.seasonDay.firstMonth ? moment(`2022-${updateTime.seasonDay.firstMonth}`).daysInMonth() : 28)" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.firstTime" />
+                            </a-select> 日 
+                            <!-- <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.firstTime" /> -->
                         </a-form-model-item>
                         <a-form-model-item label="第二季度" required>
                             <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
                             <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.second" :default-value="moment()" /> -->
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.secondMonth" >
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.secondMonth" >
                                 <a-select-option v-for="n in 12" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.secondDay" >
+                            </a-select> 月 
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.secondDay" >
                                 <a-select-option v-for="n in (updateTime.seasonDay.secondMonth ? moment(`2022-${updateTime.seasonDay.secondMonth}`).daysInMonth() : 28)" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.secondTime" />
+                            </a-select> 日 
+                            <!-- <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.secondTime" /> -->
                         </a-form-model-item>
                         <a-form-model-item label="第三季度" required>
                             <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
                             <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.third" :default-value="moment()" /> -->
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.thirdMonth" >
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.thirdMonth" >
                                 <a-select-option v-for="n in 12" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.thirdDay" >
+                            </a-select> 月 
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.thirdDay" >
                                 <a-select-option v-for="n in (updateTime.seasonDay.thirdMonth ? moment(`2022-${updateTime.seasonDay.thirdMonth}`).daysInMonth() : 28)" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.thirdTime" />
+                            </a-select> 日 
+                            <!-- <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.thirdTime" /> -->
                         </a-form-model-item>
                         <a-form-model-item label="第四季度" required>
                             <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
                             <!-- <a-date-picker style="width: 150px" v-model="updateTime.seasonDay.fourth" :default-value="moment()" /> -->
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.fourthMonth" >
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.fourthMonth" >
                                 <a-select-option v-for="n in 12" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-select style="width: 70px" v-model="updateTime.seasonDay.fourthDay" >
+                            </a-select> 月 
+                            <a-select style="width: 150px" v-model="updateTime.seasonDay.fourthDay" >
                                 <a-select-option v-for="n in (updateTime.seasonDay.fourthMonth ? moment(`2022-${updateTime.seasonDay.fourthMonth}`).daysInMonth() : 28)" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.fourthTime" />
+                            </a-select> 日 
+                            <!-- <a-time-picker :locale="localeTime" v-model="updateTime.seasonDay.fourthTime" /> -->
                         </a-form-model-item>
                     </a-form-model>
                     <a-form-model v-if="range === 'yearly'" :label-col="{span: 4}" :wrapper-col="{span: 18}">
                         <a-form-model-item label="更新时间" required>
                             <!-- <a-input type="text" v-model="tempTitle" @change="change"></a-input> -->
                             <!-- <a-date-picker v-model="updateTime.yearDay" :default-value="moment()" /> -->
-                            <a-select style="width: 70px" v-model="updateTime.yearDay.mouth" >
+                            <a-select style="width: 150px" v-model="updateTime.yearDay.mouth" >
                                 <a-select-option v-for="n in 12" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-select style="width: 70px" v-model="updateTime.yearDay.day" >
+                            </a-select> 月 
+                            <a-select style="width: 150px" v-model="updateTime.yearDay.day" >
                                 <a-select-option v-for="n in (updateTime.yearDay.mouth ? moment(`2022-${updateTime.yearDay.mouth}`).daysInMonth() : 28)" :key="n" :value="n">
                                     {{n > 9 ? n : '0' + n}}
                                 </a-select-option>
-                            </a-select>
-                            <a-time-picker :locale="localeTime" v-model="updateTime.time" />
+                            </a-select> 日 
+                            <!-- <a-time-picker :locale="localeTime" v-model="updateTime.time" /> -->
                         </a-form-model-item>
                     </a-form-model>
-                    <div class="tips">* 更新时间：指系统中提交名单的重置时间，当该时间到达，提交名单将置为空</div>
+                    <div class="tips">* 更新时间：指系统中已提交名单的重置时间，在该天凌晨0点，提交名单将置为空</div>
                 </div>
             </a-modal>
 
@@ -452,37 +454,47 @@ export default {
             try {
                 switch (this.range) {
                     case 'weekly':
-                        if(!this.updateTime.day || !this.updateTime.time) {
+                        // if(!this.updateTime.day || !this.updateTime.time) {
+                        if(!this.updateTime.day) {
                             this.$message.info('请填写完整时间！')
                             return false;
                         }
-                        this.updateData = [{day: this.updateTime.day > 9 ? this.updateTime.day : '0' + this.updateTime.day, time: this.updateTime.time.format('HH:mm:ss')}];
+                        // this.updateData = [{day: this.updateTime.day > 9 ? this.updateTime.day : '0' + this.updateTime.day, time: this.updateTime.time.format('HH:mm:ss')}];
+                        this.updateData = [{day: this.updateTime.day > 9 ? this.updateTime.day : '0' + this.updateTime.day}];
                         break;
                     case 'monthly':
-                        if(!this.updateTime.monthDay || !this.updateTime.time) {
+                        // if(!this.updateTime.monthDay || !this.updateTime.time) {
+                        if(!this.updateTime.monthDay) {
                             this.$message.info('请填写完整时间！')
                             return false;
                         }
-                        this.updateData = [{day: this.updateTime.monthDay > 9 ? this.updateTime.monthDay : '0' + this.updateTime.monthDay, time: this.updateTime.time.format('HH:mm:ss')}];
+                        // this.updateData = [{day: this.updateTime.monthDay > 9 ? this.updateTime.monthDay : '0' + this.updateTime.monthDay, time: this.updateTime.time.format('HH:mm:ss')}];
+                        this.updateData = [{day: this.updateTime.monthDay > 9 ? this.updateTime.monthDay : '0' + this.updateTime.monthDay}];
                         break;
                     case 'seasonal':
-                        if(Object.entries(this.updateTime.seasonDay).length < 12) {
+                        if(Object.entries(this.updateTime.seasonDay).length < 8) {
                             // console.log('数据还没够');
                             this.$message.info('请填写完整时间！')
                             return false;
                         }
                         this.updateData = [
-                            {day: (this.updateTime.seasonDay.firstMonth > 9 ? this.updateTime.seasonDay.firstMonth : '0'+this.updateTime.seasonDay.firstMonth) + ':' + (this.updateTime.seasonDay.firstDay > 9 ? this.updateTime.seasonDay.firstDay : '0' + this.updateTime.seasonDay.firstDay), time: this.updateTime.seasonDay.firstTime.format('HH:mm:ss')}, 
-                            {day: (this.updateTime.seasonDay.secondMonth > 9 ? this.updateTime.seasonDay.secondMonth : '0'+this.updateTime.seasonDay.secondMonth) + ':' + (this.updateTime.seasonDay.secondDay > 9 ? this.updateTime.seasonDay.secondDay : '0' + this.updateTime.seasonDay.secondDay), time: this.updateTime.seasonDay.secondTime.format('HH:mm:ss')}, 
-                            {day: (this.updateTime.seasonDay.thirdMonth > 9 ? this.updateTime.seasonDay.thirdMonth : '0'+this.updateTime.seasonDay.thirdMonth) + ':' + (this.updateTime.seasonDay.thirdDay > 9 ? this.updateTime.seasonDay.thirdDay : '0' + this.updateTime.seasonDay.thirdDay), time: this.updateTime.seasonDay.thirdTime.format('HH:mm:ss')}, 
-                            {day: (this.updateTime.seasonDay.fourthMonth > 9 ? this.updateTime.seasonDay.fourthMonth : '0'+this.updateTime.seasonDay.fourthMonth) + ':' + (this.updateTime.seasonDay.fourthDay > 9 ? this.updateTime.seasonDay.fourthDay : '0' + this.updateTime.seasonDay.fourthDay), time: this.updateTime.seasonDay.fourthTime.format('HH:mm:ss')}];
+                            // {day: (this.updateTime.seasonDay.firstMonth > 9 ? this.updateTime.seasonDay.firstMonth : '0'+this.updateTime.seasonDay.firstMonth) + '.' + (this.updateTime.seasonDay.firstDay > 9 ? this.updateTime.seasonDay.firstDay : '0' + this.updateTime.seasonDay.firstDay), time: this.updateTime.seasonDay.firstTime.format('HH:mm:ss')}, 
+                            // {day: (this.updateTime.seasonDay.secondMonth > 9 ? this.updateTime.seasonDay.secondMonth : '0'+this.updateTime.seasonDay.secondMonth) + '.' + (this.updateTime.seasonDay.secondDay > 9 ? this.updateTime.seasonDay.secondDay : '0' + this.updateTime.seasonDay.secondDay), time: this.updateTime.seasonDay.secondTime.format('HH:mm:ss')}, 
+                            // {day: (this.updateTime.seasonDay.thirdMonth > 9 ? this.updateTime.seasonDay.thirdMonth : '0'+this.updateTime.seasonDay.thirdMonth) + '.' + (this.updateTime.seasonDay.thirdDay > 9 ? this.updateTime.seasonDay.thirdDay : '0' + this.updateTime.seasonDay.thirdDay), time: this.updateTime.seasonDay.thirdTime.format('HH:mm:ss')}, 
+                            // {day: (this.updateTime.seasonDay.fourthMonth > 9 ? this.updateTime.seasonDay.fourthMonth : '0'+this.updateTime.seasonDay.fourthMonth) + '.' + (this.updateTime.seasonDay.fourthDay > 9 ? this.updateTime.seasonDay.fourthDay : '0' + this.updateTime.seasonDay.fourthDay), time: this.updateTime.seasonDay.fourthTime.format('HH:mm:ss')}];
+                            {day: (this.updateTime.seasonDay.firstMonth > 9 ? this.updateTime.seasonDay.firstMonth : '0'+this.updateTime.seasonDay.firstMonth) + '.' + (this.updateTime.seasonDay.firstDay > 9 ? this.updateTime.seasonDay.firstDay : '0' + this.updateTime.seasonDay.firstDay)}, 
+                            {day: (this.updateTime.seasonDay.secondMonth > 9 ? this.updateTime.seasonDay.secondMonth : '0'+this.updateTime.seasonDay.secondMonth) + '.' + (this.updateTime.seasonDay.secondDay > 9 ? this.updateTime.seasonDay.secondDay : '0' + this.updateTime.seasonDay.secondDay)}, 
+                            {day: (this.updateTime.seasonDay.thirdMonth > 9 ? this.updateTime.seasonDay.thirdMonth : '0'+this.updateTime.seasonDay.thirdMonth) + '.' + (this.updateTime.seasonDay.thirdDay > 9 ? this.updateTime.seasonDay.thirdDay : '0' + this.updateTime.seasonDay.thirdDay)}, 
+                            {day: (this.updateTime.seasonDay.fourthMonth > 9 ? this.updateTime.seasonDay.fourthMonth : '0'+this.updateTime.seasonDay.fourthMonth) + '.' + (this.updateTime.seasonDay.fourthDay > 9 ? this.updateTime.seasonDay.fourthDay : '0' + this.updateTime.seasonDay.fourthDay)}];
                         break;
                     case 'yearly':
-                        if(!this.updateTime.yearDay.mouth || !this.updateTime.yearDay.day || !this.updateTime.time) {
+                        // if(!this.updateTime.yearDay.mouth || !this.updateTime.yearDay.day || !this.updateTime.time) {
+                        if(!this.updateTime.yearDay.mouth || !this.updateTime.yearDay.day) {
                             this.$message.info('请填写完整时间！')
                             return false;
                         }
-                        this.updateData = [{day: (this.updateTime.yearDay.mouth > 9 ? this.updateTime.yearDay.mouth : '0' + this.updateTime.yearDay.mouth) + ':' + (this.updateTime.yearDay.day > 9 ? this.updateTime.yearDay.day : '0' + this.updateTime.yearDay.day), time: this.updateTime.time.format('HH:mm:ss')}];
+                        // this.updateData = [{day: (this.updateTime.yearDay.mouth > 9 ? this.updateTime.yearDay.mouth : '0' + this.updateTime.yearDay.mouth) + '.' + (this.updateTime.yearDay.day > 9 ? this.updateTime.yearDay.day : '0' + this.updateTime.yearDay.day), time: this.updateTime.time.format('HH:mm:ss')}];
+                        this.updateData = [{day: (this.updateTime.yearDay.mouth > 9 ? this.updateTime.yearDay.mouth : '0' + this.updateTime.yearDay.mouth) + '.' + (this.updateTime.yearDay.day > 9 ? this.updateTime.yearDay.day : '0' + this.updateTime.yearDay.day)}];
                         break;
                     default:
                         this.updateData = [];

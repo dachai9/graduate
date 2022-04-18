@@ -1,77 +1,41 @@
 let express = require('express')
 let router = express.Router()
 let db = require('../db/index')
-let { verifyToken } = require("./util");
-let { getToken } = require("./util");
+let schedule = require("node-schedule");
+let moment = require("moment");
 
-// router.get('/index', (req, res) => {
-//     var sql = 'SELECT * FROM enterprise.`table_index`;'
-//     db.query(sql, (err, data) => {
-//         if (err) {
-//             return res.send('错误：' + err.message)
-//         }
-//         res.send(data)
-//     })
-// })
-// 登录
-router.post('/login', (req, res) => {
-    // req.body.first_name
-    var sql = `SELECT * from allstaff where staffId = ${req.body.number} and psw = ${req.body.password}`
-    db.query(sql, (err, data) => {
-        if (err) {
-            return res.send({ status: 0, message: "登录失败，请重试！" });
-        }
-        // if (data.length) {
-        // 	return res.send({
-        // 		status: 1,
-        // 		message: "登录成功！",
-        // 		uid: getToken({ userStatus: 1, account }),
-        // 	});
-        // } else {
-        // 	return res.send({
-        // 		status: 0,
-        // 		message: "账号或密码错误！",
-        // 	});
-        // }
-        if (data.length) {
-            // console.log('data', data);
-            data[0].uid = getToken({ userStatus: 1 });
-            return res.status(200).send(data);
-        } else {
-            return res.status(200).send({ status: 0, message: "账号或密码错误！" });
-        }
-        // data[0].uid = getToken({ userStatus: 1, account });
-        // console.log('data', data);
-        // res.send(data)
-    })
-})
 
-// 修改密码
-router.post('/changepsw', (req, res) => {
-    const { status, code, message } = verifyToken(req.headers);
-    if (status) {
-        // req.body.first_name
-        // var sql = `update allstaff set psw = ${req.body.nPassword} where staffId = ${req.body.number} and psw = ${req.body.oPassword};`
-        var sql = `SELECT * from allstaff where staffId = ${req.body.number} and psw = ${req.body.oPassword}`;
-        var updateSql = `update allstaff set psw = ${req.body.nPassword} where staffId = ${req.body.number}`;
-        db.query(sql, (err, data) => {
-            if (err) {
-                return res.status(500).send({ err, status: 0, message: "获取旧密码失败，请重试！" })
+var sql = `update templates set submitList = null where submitTime <> '' and (
+	(JSON_UNQUOTE(JSON_EXTRACT(cast(temp as json), '$."range"')) = 'weekly' 
+		and JSON_UNQUOTE(JSON_EXTRACT(cast(updateTime as json), '$[0]."day"')) = DATE_FORMAT(now(), '%W')
+	) or 
+	(JSON_UNQUOTE(JSON_EXTRACT(cast(temp as json), '$."range"')) = 'monthly' 
+		and JSON_UNQUOTE(JSON_EXTRACT(cast(updateTime as json), '$[0]."day"')) = DATE_FORMAT(now(), '%d')
+	) or
+	(JSON_UNQUOTE(JSON_EXTRACT(cast(temp as json), '$."range"')) = 'seasonal' 
+		and (
+    (JSON_UNQUOTE(JSON_EXTRACT(cast(updateTime as json), '$[0]."day"')) = CONCAT_WS('.', DATE_FORMAT(now(), '%m'), DATE_FORMAT(now(), '%d'))) 
+    or (JSON_UNQUOTE(JSON_EXTRACT(cast(updateTime as json), '$[1]."day"')) = CONCAT_WS('.', DATE_FORMAT(now(), '%m'), DATE_FORMAT(now(), '%d'))) 
+    or (JSON_UNQUOTE(JSON_EXTRACT(cast(updateTime as json), '$[2]."day"')) = CONCAT_WS('.', DATE_FORMAT(now(), '%m'), DATE_FORMAT(now(), '%d'))) 
+    or (JSON_UNQUOTE(JSON_EXTRACT(cast(updateTime as json), '$[3]."day"')) = CONCAT_WS('.', DATE_FORMAT(now(), '%m'), DATE_FORMAT(now(), '%d')))
+		)
+	) or 
+	(JSON_UNQUOTE(JSON_EXTRACT(cast(temp as json), '$."range"')) = 'yearly' 
+		and JSON_UNQUOTE(JSON_EXTRACT(cast(updateTime as json), '$[0]."day"')) = CONCAT_WS('.', DATE_FORMAT(now(), '%m'), DATE_FORMAT(now(), '%d'))
+	)
+)`
+setSchedule(sql);
+function setSchedule(sql) {
+    schedule.scheduleJob('0 0 0 * * *', () => {
+        // console.log('已读名单置空', new moment().format('YYYY-MM-DD HH:mm:ss'), count);
+        db.query(sql, (error) => {
+            if (error) {
+                return false;
             }
-            if (data.length) {
-                db.query(updateSql, (err) => {
-                    if (err) {
-                        return res.status(500).send({ err, status: 0, message: "修改密码失败，请重试！" });
-                    }
-                    res.status(200).send('success')
-                })
-            } else {
-                res.status(200).send('工号或密码输入错误 ！')
-            }
+            console.log('已提交名单置空', moment('YYYY-MM-DD HH:mm:ss'));
         })
-    } else {
-        return res.status(code).send({ status: 0, message });
-    }
-})
+    });
+}
+
 
 module.exports = router
