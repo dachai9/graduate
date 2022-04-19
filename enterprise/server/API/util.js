@@ -6,12 +6,13 @@ module.exports = {
 		// payload定义token的有限载荷
 		//签发token
 		const token = jwt.sign(payload, secret, {
-			expiresIn: "10 days",
+			expiresIn: "5 days",
 		}); // 设置过期时间
 		return token;
 	},
 	verifyToken: (headers) => {
-		const token = headers.Authorization;
+		const token = headers.authorization;
+		// console.log('token', headers, token);
 		let res;
 		jwt.verify(token, secret, (err) => {
 			if (err) {
@@ -26,8 +27,8 @@ module.exports = {
 						res = { code: 500, status: 0, message: "服务器错误" };
 				}
 			}
-			res = { code: 200, status: 1, message: "身份验证成功" };
+
 		});
-		return res;
+		return res || { code: 200, status: 1, message: "身份验证成功" };;
 	},
 };

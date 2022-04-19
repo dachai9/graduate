@@ -32,7 +32,7 @@ function setSchedule(sql) {
             if (error) {
                 return false;
             }
-            console.log('已提交名单置空', moment('YYYY-MM-DD HH:mm:ss'));
+            console.log('已提交名单置空', new moment().format('YYYY-MM-DD HH:mm:ss'));
         })
     });
 }

@@ -16,7 +16,7 @@ router.post('/updateReportData', async (req, res) => {
         } else {
             var sql = `insert into reports (title, content, rangeType, ${req.body.saveTime === '' ? 'submitTime' : 'saveTime'}, author, tempId, shortCut) values ('${req.body.title}', '${req.body.content}', '${req.body.range}', '${req.body.saveTime === '' ? req.body.submitTime : req.body.saveTime}', '${req.body.author}', ${req.body.tempId}, '${req.body.shortCut}');`;
         }
-        // var selectSql = `select max(reportId) as id from reports`;
+        var selectSql = `select max(reportId) as id from reports`;
         var getSubmitSql = `select submitList from templates where tempId = ${req.body.tempId}`;
         // console.log('sql', sql);
         // console.log('selectSql', selectSql);
@@ -36,6 +36,11 @@ router.post('/updateReportData', async (req, res) => {
                         submitList = submitListData[0].submitList ? JSON.parse(submitListData[0].submitList) : [];
 
                         // console.log('submitList', submitList);
+
+                        // 判断是否已存在
+                        // ------------------------------------------------------------------------------------------------------------------------------------
+
+
                         submitList.push(req.body.author);
                         // console.log('submitList', submitList);
                         var updateSubmitSql = `update templates set submitList = '${JSON.stringify(submitList)}' where tempId = ${req.body.tempId}`;
@@ -48,6 +53,8 @@ router.post('/updateReportData', async (req, res) => {
                             resolve()
                         })
                     })
+                } else {
+                    resolve()
                 }
             }).then(() => {
                 if (req.body.change) {
