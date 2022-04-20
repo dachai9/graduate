@@ -166,6 +166,7 @@ export default {
             // console.log('this.insertReportData', JSON.stringify(changedData));
         },
         checkFormRequire() {
+            // 对报告内容进行处理
             this.changeDataFormat();
             // console.log('this.allFormData', this.dynamicForm, this.allFormData);
             if(this.insertReportData.title.length == 0) {
@@ -191,26 +192,26 @@ export default {
             return true;
         },
         saveToDraft() {
-            if(this.checkFormRequire()) {
-                this.insertReportData.submitTime = '';
-                this.insertReportData.saveTime = new moment().format('YYYY-MM-DD HH:mm:ss');
-                this.changeDataFormat();
-                // 保存 saveTime// 提交数据
-                this.$axios.post('/updateReportData', this.insertReportData).then(() => {
-                    // console.log('res', res.data[0].id);
-                    // 跳转到详情
-                    this.$router.push('/draft?type=reports');
-                    // if(this.type.type === 'draft') {
-                    // } else {
-                    //     this.$router.push(`/report?type=detail&range=${this.insertReportData.range}&id=${res.data[0].id}&temp=${this.insertReportData.tempId}`);
-                    //     this.$router.go(0);
-                    // }
-                    this.$emit('toggleSpin', false);
-                })
-                console.log('点击保存进草稿箱', this.insertReportData);
-            } else {
-                this.$message.info('请填写完整！');
-            }
+            // if(this.checkFormRequire()) {
+            this.insertReportData.submitTime = '';
+            this.insertReportData.saveTime = new moment().format('YYYY-MM-DD HH:mm:ss');
+            this.changeDataFormat();
+            // 保存 saveTime// 提交数据
+            this.$axios.post('/updateReportData', this.insertReportData).then((res) => {
+                console.log('res', res.data[0].id);
+                // 跳转到详情
+                this.$router.push('/draft?type=reports');
+                // if(this.type.type === 'draft') {
+                // } else {
+                //     this.$router.push(`/report?type=detail&range=${this.insertReportData.range}&id=${res.data[0].id}&temp=${this.insertReportData.tempId}`);
+                //     this.$router.go(0);
+                // }
+                this.$emit('toggleSpin', false);
+            })
+            console.log('点击保存进草稿箱', this.insertReportData);
+            // } else {
+            //     this.$message.info('请填写完整！');
+            // }
         },
         saveToSubmit() {
             if(this.checkFormRequire()) {
